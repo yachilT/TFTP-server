@@ -1,6 +1,6 @@
 package bgu.spl.net.impl.tftp;
 
-import java.util.List;
+
 
 public abstract class BasePacket {
     protected final static byte[] ZERO = new byte[]{(byte) 0};
