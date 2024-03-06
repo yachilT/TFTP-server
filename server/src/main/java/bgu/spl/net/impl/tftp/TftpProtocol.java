@@ -26,9 +26,9 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             lastDataPacket = null;
         }
 
-        public DataPacket sendFirst() {
+        public DataPacket sendFirst() throws IOException {
             byte[] data = reader.readNBytes(DataPacket.MAX_DATA_SIZE);
-            lastDataPacket = new DataPacket(0, data);
+            lastDataPacket = new DataPacket((short)0, data);
             return lastDataPacket;
         }
 
@@ -38,7 +38,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             }
 
             byte[] data = reader.readNBytes(DataPacket.MAX_DATA_SIZE);
-            lastDataPacket = new DataPacket(lastDataPacket.getBlockNumber() + 1, data);
+            lastDataPacket = new DataPacket((short)(lastDataPacket.getBlockNumber() + 1), data);
             return lastDataPacket;
         }
 
