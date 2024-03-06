@@ -9,7 +9,7 @@ import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class ReadRQPacket extends BasePacket {
     private String fileName;
-    public ReadRQPacket(OpCode opcode){
+    public ReadRQPacket(){
         super(OpCode.RRQ);
         this.fileName = null;
     }

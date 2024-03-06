@@ -1,6 +1,7 @@
 package bgu.spl.net.impl.tftp.packets;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import bgu.spl.net.impl.tftp.OpCode;
 import bgu.spl.net.impl.tftp.TftpProtocol;
@@ -39,6 +40,14 @@ public class BroadCastPacket extends BasePacket {
             short num = convert2BytesToShort(bytes.get(0), bytes.get(1));
             added = num == 1 ? true : false;
             bytes.clear();
+            return false;
         }
+        if(nextByte == 0){
+            fileName = new String(convertListToByteArr(bytes), StandardCharsets.UTF_8);
+            bytes.clear();
+            return true;
+        }
+        
+        return false;
     }
 }
