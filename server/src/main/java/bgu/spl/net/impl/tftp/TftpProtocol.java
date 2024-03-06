@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 
 import bgu.spl.net.api.BidiMessagingProtocol;
 import bgu.spl.net.impl.tftp.packets.*;
@@ -15,14 +16,12 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private int currentClientId;
 
     private class SendingHandler {
-        private File workingFile;
         private FileInputStream reader;
 
         private DataPacket lastDataPacket;
 
-        public SendingHandler(File workingFile) throws FileNotFoundException {
-            this.workingFile = workingFile;
-            this.reader = new FileInputStream(workingFile);
+        public SendingHandler(String name) throws FileNotFoundException {
+            this.reader = new FileInputStream(name);
             lastDataPacket = null;
         }
 
@@ -51,6 +50,20 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             reader.close();
         }
     }
+
+    private class ReceivingHandler {
+        private File workingFile;
+        private FileOutputStream writer;
+
+        public ReceivingHandler(String name) throws FileAlreadyExistsException, FileNotFoundException {
+            workingFile = new File(name);
+            if (workingFile.exists())
+                throw new FileAlreadyExistsException(name);
+            writer = new FileOutputStream(workingFile);
+        }
+
+        
+    }
     
 
     private boolean receivingData;
@@ -66,7 +79,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     public void process(BasePacket message) {
 
         if (sendingData){
-            if (message.getOpCode() == OpCode.ACK.ordinal() && ((AcknowledgePacket) message).) {
+            if (message.getOpCode() == OpCode.ACK) {
 
             }
         }
