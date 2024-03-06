@@ -24,7 +24,10 @@ public abstract class BasePacket {
     public abstract byte[] encodePacket();
     public abstract boolean decodeNextByte(byte nextByte);
 
-
+    public short getOpCode()
+    {
+        return opcode;
+    }
     protected byte[] convertShortToBytes(short num){
         return new byte[]{(byte) (num >> 8), (byte) (num & 0xff)};
     }

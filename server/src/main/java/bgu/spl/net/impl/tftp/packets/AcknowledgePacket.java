@@ -33,5 +33,9 @@ public class AcknowledgePacket extends BasePacket {
             bytes.add(nextByte);
             
     }
+
+    public short getBlockNumber() {
+        return blockNumber;
+    }
     
 }

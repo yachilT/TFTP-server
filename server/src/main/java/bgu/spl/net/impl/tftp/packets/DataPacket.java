@@ -1,6 +1,7 @@
 package bgu.spl.net.impl.tftp.packets;
 
 public class DataPacket extends BasePacket {
+    public static final short MAX_DATA_SIZE = 511;
     short blockNumber;
     byte[] data;
     public DataPacket(short opcode, short length, short blockNumber, byte[] data){
@@ -10,7 +11,11 @@ public class DataPacket extends BasePacket {
     }
     @Override
     public void applyRequest(){
+        
+    }
 
+    public short getBlockNumber() {
+        return blockNumber;
     }
     @Override
     public byte[] encodePacket() {
