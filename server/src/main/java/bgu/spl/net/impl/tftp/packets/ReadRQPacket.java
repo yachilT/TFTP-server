@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import bgu.spl.net.impl.tftp.OpCode;
-import bgu.spl.net.impl.tftp.TftpEncoderDecoder;
 import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class ReadRQPacket extends BasePacket {
@@ -17,6 +16,11 @@ public class ReadRQPacket extends BasePacket {
     public void applyRequest(TftpProtocol tftp){
         tftp.processReadRQPacket(this);
     }
+
+    public String getFileName() {
+        return fileName;
+    }
+
     @Override
     public byte[] encodePacket() {
         byte[] result;

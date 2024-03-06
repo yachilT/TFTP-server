@@ -16,6 +16,10 @@ public class WriteRQPacket extends BasePacket {
     public void applyRequest(TftpProtocol protocol){
 
     }
+
+    public String getFileName() {
+        return fileName;
+    }
     @Override
     public byte[] encodePacket() {
         byte[] result;
