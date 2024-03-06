@@ -1,6 +1,7 @@
 package bgu.spl.net.impl.tftp.packets;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import bgu.spl.net.impl.tftp.OpCode;
 import bgu.spl.net.impl.tftp.TftpProtocol;
@@ -33,6 +34,25 @@ public class ErrorPacket extends BasePacket {
         result = mergeArrays(result, ZERO); // 0 byte
 
         return result;
+    }
+    @Override
+    public boolean decodeNextByte(byte nextByte){
+        if(nextByte != 0){
+            bytes.add(nextByte);
+            length++;
+        }
+        if(length == 4){
+            errorCode = convert2BytesToShort(bytes.get(0), bytes.get(1));
+            bytes.clear();
+            return false;
+        }
+        
+        if(nextByte == 0){
+            errMsg = new String(convertListToByteArr(bytes), StandardCharsets.UTF_8);
+            bytes.clear();
+            return true;
+        }
+        return false;
     }
     
 }

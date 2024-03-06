@@ -5,7 +5,7 @@ import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class DisconnectRQPacket extends BasePacket {
 
-    public DisconnectRQPacket(short opcode){
+    public DisconnectRQPacket(){
         super(OpCode.DISC);
     }
     @Override
@@ -14,13 +14,11 @@ public class DisconnectRQPacket extends BasePacket {
     }
     @Override
     public byte[] encodePacket() {
-        return convertShortToBytes(opcode); // opcode
+        return convertShortToBytes((short)opcode.ordinal()); // opcode
     }
     @Override
     public boolean decodeNextByte(byte nextByte){
-        if(nextByte != 0){
-            
-        }
+        return true;
     }
     
 }

@@ -9,13 +9,11 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
     //TODO: Implement here the TFTP encoder and decoder
     final LinkedList<Byte> currentBytes;
     private short desiredLength;
-    private OpCode opCode;
     private BasePacket packet;
 
     public TftpEncoderDecoder() {
         currentBytes = new LinkedList<>();
         desiredLength = -1;
-        opCode = OpCode.UNDEFINED;
         packet = null;
     }
 
@@ -25,74 +23,56 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
         if (currentBytes.size() == 2) {
             short incomingOpCode = convert2BytesToShort(currentBytes.get(0), currentBytes.get(1));
             if (incomingOpCode == OpCode.RRQ.ordinal()) {
-                opCode = OpCode.RRQ;
+                packet = new ReadRQPacket();
                 return null;
             }
 
             if (incomingOpCode == OpCode.WRQ.ordinal()) {
-                opCode = OpCode.WRQ;
+                packet = new WriteRQPacket();
                 return null;
             }
 
             if (incomingOpCode == OpCode.DATA.ordinal()) {
-                opCode = OpCode.DATA;
+                packet = new DataPacket();
                 return null;
             }
 
             if (incomingOpCode == OpCode.ACK.ordinal()) {
-                opCode = OpCode.ACK;
+                packet = new AcknowledgePacket();
                 return null;
             }
 
             if (incomingOpCode == OpCode.ERROR.ordinal()) {
-                opCode = OpCode.ERROR;
+                packet = new ErrorPacket();
                 return null;
             }
 
-            if (incomingOpCode == OpCode.DIRQ.ordinal() | incomingOpCode == OpCode.DISC.ordinal()) {
-                opCode = OpCode.UNDEFINED;
-                
+            if (incomingOpCode == OpCode.DIRQ.ordinal()) {
+                return new DirectoryRQPacket();
+            }
+            if(incomingOpCode == OpCode.DISC.ordinal()){
+                return new DisconnectRQPacket();
             }
 
             if (incomingOpCode == OpCode.LOGRQ.ordinal()) {
-                opCode = OpCode.LOGRQ;
+                packet = new LoginRQPacket();
                 return null;
             }
 
             if (incomingOpCode == OpCode.DELRQ.ordinal()) {
-                opCode = OpCode.DELRQ;
+                packet = new DeleteRQPacket();
                 return null;
             }
 
             if (incomingOpCode == OpCode.BCAST.ordinal()) {
-                opCode = OpCode.BCAST;
+                packet = new BroadCastPacket();
                 return null;
             }
         } 
-        else if (opCode == OpCode.ACK && currentBytes.size() == 4) {
-            opCode = OpCode.UNDEFINED;
-            return convertToByteArr();
-        }
-        else if (opCode == OpCode.DATA && currentBytes.size() == 4) {
-            desiredLength = convert2BytesToShort(currentBytes.get(3), currentBytes.get(4));
+        if(packet.decodeNextByte(nextByte))
+            return packet;
+        else
             return null;
-        }
-        else if (opCode == OpCode.DATA & currentBytes.size() == desiredLength) {
-            desiredLength = -1;
-            opCode = OpCode.UNDEFINED;
-            return convertToByteArr();
-        }
-        else if ((opCode == OpCode.RRQ 
-        | opCode == OpCode.WRQ 
-        | opCode == OpCode.LOGRQ 
-        | opCode == OpCode.DELRQ 
-        | (opCode == OpCode.ERROR & currentBytes.size() > 4)
-        | (opCode == OpCode.BCAST & currentBytes.size() > 3)) & nextByte == 0) {
-            opCode = OpCode.UNDEFINED;
-            return convertToByteArr();
-        } 
-        return null;
-
     }
 
     @Override
@@ -101,7 +81,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
     }
 
     private short convert2BytesToShort(byte b1, byte b2) {
-        return (short) ((short)(b1 << 8) | (short)b2);
+        return (short) ((short)((b1 & 0xFF) << 8) | (short)(b2 & 0xFF));
     } 
 
     private byte[] convertToByteArr() {

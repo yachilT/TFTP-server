@@ -37,7 +37,7 @@ public abstract class BasePacket {
         return new byte[]{(byte) (num >> 8), (byte) (num & 0xff)};
     }
     protected short convert2BytesToShort(byte b1, byte b2) {
-        return (short) ((short)(b1 << 8) | (short)b2);
+        return (short) ((short)((b1 & 0xFF) << 8) | (short)(b2 & 0xFF));
     } 
     protected byte[] mergeArrays(byte[] arr1, byte[] arr2){
         byte[] merge = new byte[arr1.length + arr2.length];

@@ -8,8 +8,8 @@ import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class WriteRQPacket extends BasePacket {
     private String fileName;
-    public WriteRQPacket(OpCode opcode){
-        super(opcode);
+    public WriteRQPacket(){
+        super(OpCode.WRQ);
         this.fileName = null;
     }
     @Override
