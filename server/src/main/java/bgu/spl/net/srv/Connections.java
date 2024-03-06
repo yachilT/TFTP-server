@@ -9,4 +9,7 @@ public interface Connections<T> {
     boolean send(int connectionId, T msg);
 
     void disconnect(int connectionId);
+
+    void lock(int connectionId);
+    void unlock(int connectionId); // for broadcast
 }
