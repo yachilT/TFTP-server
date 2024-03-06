@@ -1,8 +1,6 @@
 package bgu.spl.net.impl.tftp;
 
 import java.io.UnsupportedEncodingException;
-import java.util.LinkedList;
-import java.util.List;
 
 public class LoginRQPacket extends BasePacket{
     String username;
