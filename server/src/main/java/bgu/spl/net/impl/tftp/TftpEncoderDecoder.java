@@ -3,8 +3,9 @@ package bgu.spl.net.impl.tftp;
 import java.util.LinkedList;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
+import bgu.spl.net.impl.tftp.packets.*;
 
-public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
+public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
     //TODO: Implement here the TFTP encoder and decoder
     final LinkedList<Byte> currentBytes;
     private short desiredLength;
@@ -17,7 +18,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
     }
 
     @Override
-    public byte[] decodeNextByte(byte nextByte) {
+    public BasePacket decodeNextByte(byte nextByte) {
         currentBytes.add(nextByte);
         if (currentBytes.size() == 2) {
             short incomingOpCode = convert2BytesToShort(currentBytes.get(0), currentBytes.get(1));
@@ -93,8 +94,8 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
     }
 
     @Override
-    public byte[] encode(byte[] message) {
-        return message;
+    public byte[] encode(BasePacket message) {
+        return message.encodePacket();
     }
 
     private short convert2BytesToShort(byte b1, byte b2) {

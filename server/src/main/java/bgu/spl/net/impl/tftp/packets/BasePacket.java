@@ -1,6 +1,6 @@
 package bgu.spl.net.impl.tftp.packets;
 
-
+import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public abstract class BasePacket {
     protected final static byte[] ZERO = new byte[]{(byte) 0};
@@ -12,7 +12,7 @@ public abstract class BasePacket {
         this.opcode = opcode;
         this.length = length;
     }
-    public abstract void applyRequest();
+    public abstract void applyRequest(TftpProtocol tftp);
     public abstract byte[] encodePacket();
 
     protected byte[] convertShortToBytes(short num){
