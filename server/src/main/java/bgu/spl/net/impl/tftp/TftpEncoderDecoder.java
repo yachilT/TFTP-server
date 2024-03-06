@@ -10,11 +10,13 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
     final LinkedList<Byte> currentBytes;
     private short desiredLength;
     private OpCode opCode;
+    private BasePacket packet;
 
     public TftpEncoderDecoder() {
         currentBytes = new LinkedList<>();
         desiredLength = -1;
         opCode = OpCode.UNDEFINED;
+        packet = null;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
 
             if (incomingOpCode == OpCode.DIRQ.ordinal() | incomingOpCode == OpCode.DISC.ordinal()) {
                 opCode = OpCode.UNDEFINED;
-                return convertToByteArr();
+                
             }
 
             if (incomingOpCode == OpCode.LOGRQ.ordinal()) {

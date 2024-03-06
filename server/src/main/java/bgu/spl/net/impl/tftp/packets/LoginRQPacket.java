@@ -2,6 +2,8 @@ package bgu.spl.net.impl.tftp.packets;
 
 import java.io.UnsupportedEncodingException;
 
+import bgu.spl.net.impl.tftp.TftpProtocol;
+
 public class LoginRQPacket extends BasePacket{
     String username;
     public LoginRQPacket(short opcode, short length, String username){
@@ -9,7 +11,7 @@ public class LoginRQPacket extends BasePacket{
         this.username = username;
     }
     @Override
-    public void applyRequest(){
+    public void applyRequest(TftpProtocol tftp){
 
     }
     @Override
