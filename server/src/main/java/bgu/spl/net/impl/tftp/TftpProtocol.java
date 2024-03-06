@@ -62,12 +62,20 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             writer = new FileOutputStream(workingFile);
         }
 
-        
-    }
-    
+        public AcknowledgePacket receive(DataPacket packet) throws IOException {
+            byte[] b = packet.getData();
+            writer.write(b);
 
-    private boolean receivingData;
-    private FileOutputStream writer;
+            return new AcknowledgePacket(packet.getBlockNumber());
+        }
+
+    }
+
+    boolean sendingData;
+    SendingHandler sendingHandler;
+
+    boolean receivingData;
+    ReceivingHandler receivingHandler;
 
     @Override
     public void start(int connectionId, Connections<BasePacket> connections) {
@@ -80,7 +88,13 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
         if (sendingData){
             if (message.getOpCode() == OpCode.ACK) {
-
+                    try {
+                        sendingHandler.sendNext((AcknowledgePacket)message);
+                    } catch (IllegalArgumentException e) {
+                        ErrorPacket errorPacket = new ErrorPacket((short)0, "Incorrect block number from ACK");
+                    } catch (IOException e) {
+                        ErrorPacket errorPacket = new ErrorPacket((short)0, "Unexpected IO exception");
+                    }
             }
         }
             // check for the right ACK (with OpCode of argument)and send next one, if didnt receive valid ACK, send error and cancel sending (reset)

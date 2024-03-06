@@ -31,6 +31,10 @@ public class DataPacket extends BasePacket {
     public short getBlockNumber() {
         return blockNumber;
     }
+
+    public byte[] getData(){
+        return data;
+    }
     @Override
     public byte[] encodePacket() {
         byte[] result;
