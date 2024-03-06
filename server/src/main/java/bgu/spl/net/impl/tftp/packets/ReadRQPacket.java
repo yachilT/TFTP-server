@@ -1,26 +1,26 @@
-package bgu.spl.net.impl.tftp;
+package bgu.spl.net.impl.tftp.packets;
 
 import java.io.UnsupportedEncodingException;
 
-public class LoginRQPacket extends BasePacket{
-    String username;
-    public LoginRQPacket(short opcode, short length, String username){
+public class ReadRQPacket extends BasePacket {
+    String fileName;
+    public ReadRQPacket(short opcode, short length, String fileName){
         super(opcode, length);
-        this.username = username;
+        this.fileName = fileName;
     }
     @Override
     public void applyRequest(){
 
     }
     @Override
-    public byte[] encodePacket(){
+    public byte[] encodePacket() {
         byte[] result;
         result = convertShortToBytes(opcode); // opcode
         try {
-            result = mergeArrays(result, username.getBytes("UTF-8")); //username
+            result = mergeArrays(result, fileName.getBytes("UTF-8")); //file name
         } catch (UnsupportedEncodingException e) {}
         result = mergeArrays(result, ZERO); // 0 byte
-        
+
         return result;
     }
 }

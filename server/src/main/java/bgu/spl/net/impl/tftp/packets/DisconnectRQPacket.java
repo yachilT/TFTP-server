@@ -1,4 +1,4 @@
-package bgu.spl.net.impl.tftp;
+package bgu.spl.net.impl.tftp.packets;
 
 public class DisconnectRQPacket extends BasePacket {
 

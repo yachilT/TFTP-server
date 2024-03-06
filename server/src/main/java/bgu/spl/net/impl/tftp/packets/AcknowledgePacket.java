@@ -1,12 +1,10 @@
-package bgu.spl.net.impl.tftp;
+package bgu.spl.net.impl.tftp.packets;
 
-public class DataPacket extends BasePacket {
+public class AcknowledgePacket extends BasePacket {
     short blockNumber;
-    byte[] data;
-    public DataPacket(short opcode, short length, short blockNumber, byte[] data){
-        super(opcode, length);
+    public AcknowledgePacket(short opcode, short blockNumber){
+        super(opcode, (short) 4);
         this.blockNumber = blockNumber;
-        this.data = data;
     }
     @Override
     public void applyRequest(){
@@ -16,9 +14,7 @@ public class DataPacket extends BasePacket {
     public byte[] encodePacket() {
         byte[] result;
         result = convertShortToBytes(opcode); // opcode
-        result = mergeArrays(result, convertShortToBytes(length)); // size
         result = mergeArrays(result, convertShortToBytes(blockNumber)); // block number
-        result = mergeArrays(result, data); // data
 
         return result;
     }

@@ -55,7 +55,7 @@ public abstract class BaseServer<T> implements Server<T> {
 		if (sock != null)
 			sock.close();
     }
-
     protected abstract void execute(BlockingConnectionHandler<T>  handler);
 
 }
+     
