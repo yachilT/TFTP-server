@@ -3,7 +3,8 @@ package bgu.spl.net.srv;
 import java.util.WeakHashMap;
 
 public class ConnectionsImpl<T> implements Connections <T > {
-    private final WeakHashMap<Integer, ConnectionHandler<T>> connections = new WeakHashMap<>();;
+    private final WeakHashMap<Integer, ConnectionHandler<T>> connections = new WeakHashMap<>();
+
     @Override
     public void connect(int connectionId, ConnectionHandler<T> handler) {
         connections.put(connectionId, handler);
@@ -21,6 +22,16 @@ public class ConnectionsImpl<T> implements Connections <T > {
     @Override
     public void disconnect(int connectionId) {
         connections.remove(connectionId);
+    }
+
+    @Override
+    public void lock(int connectionId) {
+        connections.get(connectionId).lock();
+    }
+
+    @Override
+    public void unlock(int connectionId) {
+        connections.get(connectionId).unlock();
     }
     
 }
