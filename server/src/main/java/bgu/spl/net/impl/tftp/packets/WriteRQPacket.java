@@ -1,27 +1,43 @@
 package bgu.spl.net.impl.tftp.packets;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
+import bgu.spl.net.impl.tftp.OpCode;
+import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class WriteRQPacket extends BasePacket {
-    String fileName;
-    public WriteRQPacket(short opcode, short length, String fileName){
-        super(opcode, length);
-        this.fileName = fileName;
+    private String fileName;
+    public WriteRQPacket(OpCode opcode){
+        super(opcode);
+        this.fileName = null;
     }
     @Override
-    public void applyRequest(){
+    public void applyRequest(TftpProtocol protocol){
 
     }
     @Override
     public byte[] encodePacket() {
         byte[] result;
-        result = convertShortToBytes(opcode); // opcode
+        result = convertShortToBytes((short)opcode.ordinal()); // opcode
         try {
             result = mergeArrays(result, fileName.getBytes("UTF-8")); // file name
         } catch (UnsupportedEncodingException e) {} 
         result = mergeArrays(result, ZERO); // 0 byte
 
         return result;
+    }
+    @Override
+    public boolean decodeNextByte(byte nextByte){
+        if(nextByte != 0){
+            bytes.add(nextByte);
+            length++;
+            return false;
+        }
+        byte[] byteArr = convertListToByteArr(bytes);
+        bytes.clear();
+        fileName = new String(byteArr, StandardCharsets.UTF_8);
+        return true;
     }
     
 }

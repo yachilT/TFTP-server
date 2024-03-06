@@ -1,20 +1,21 @@
 package bgu.spl.net.impl.tftp.packets;
 
-import java.util.LinkedList;
-import java.util.List;
 
+import bgu.spl.net.impl.tftp.OpCode;
 import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class AcknowledgePacket extends BasePacket {
     private short blockNumber;
-    private final List<Byte> bytes = new LinkedList<>();
 
 
-    public AcknowledgePacket(short opcode, short blockNumber){
-        super(opcode, (short) 4);
+    public AcknowledgePacket(){
+        super(OpCode.ACK);
+        this.blockNumber = -1;
+    }
+    public AcknowledgePacket(short blockNumber){
+        super(OpCode.ACK, (short)-1);
         this.blockNumber = blockNumber;
     }
-
     @Override
     public void applyRequest(TftpProtocol protocol){
 
@@ -22,16 +23,21 @@ public class AcknowledgePacket extends BasePacket {
     @Override
     public byte[] encodePacket() {
         byte[] result;
-        result = convertShortToBytes(opcode); // opcode
+        result = convertShortToBytes((short)opcode.ordinal()); // opcode
         result = mergeArrays(result, convertShortToBytes(blockNumber)); // block number
 
         return result;
     }
     @Override
     public boolean decodeNextByte(byte nextByte){
-        if(nextByte != 0)
-            bytes.add(nextByte);
-            
+        bytes.add(nextByte);
+        length++;
+        if(bytes.size() == 2){
+            blockNumber = convert2BytesToShort(bytes.get(0), bytes.get(1));
+            bytes.clear();
+            return true; 
+        }
+        return false;
     }
 
     public short getBlockNumber() {
