@@ -153,7 +153,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             }
         }
         //should synchronize acording to type of packet (data)
-        connections.send(currentClientId, returnPacket);
+ctions.send(currentClientId, returnPacket);
     }
 
     @Override
