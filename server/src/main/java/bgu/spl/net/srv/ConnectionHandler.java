@@ -18,6 +18,8 @@ public interface ConnectionHandler<T> extends Closeable {
      */
     void lock();
     void unlock(); // for broadcast.
+    boolean isLoggedIn();
+    void login(String username);
 
     void send(T msg);
 

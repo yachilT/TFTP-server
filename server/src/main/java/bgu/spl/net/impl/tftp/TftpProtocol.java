@@ -130,30 +130,14 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         }
 
         if (message.getOpCode() == OpCode.RRQ) {
-            try {
-                sendingHandler = new SendingHandler(((ReadRQPacket)message).getFileName());
-                sendingData = true;
-                returnPacket = sendingHandler.sendFirst();
-
-            } catch (FileNotFoundException e) {
-                returnPacket = new ErrorPacket((short)1, "File not found");
-            } catch (IOException e) {
-                returnPacket = new ErrorPacket((short)0, "Failed to read data from requested file")
-            }
+            returnPacket = processReadRQPacket((ReadRQPacket)message);
         }
 
         if (message.getOpCode() == OpCode.WRQ) {
-            try {
-                receivingHandler = new ReceivingHandler(((WriteRQPacket)message).getFileName());
-                receivingData = true;
-            } catch (FileAlreadyExistsException e) {
-                returnPacket = new ErrorPacket((short)5, "File already exists");
-            } catch (IOException e) {
-                returnPacket = new ErrorPacket((short)0, "Failed to write to file");
-            }
+
         }
         //should synchronize acording to type of packet (data)
-ctions.send(currentClientId, returnPacket);
+        connections.send(currentClientId, returnPacket);
     }
 
     @Override
@@ -162,22 +146,34 @@ ctions.send(currentClientId, returnPacket);
         throw new UnsupportedOperationException("Unimplemented method 'shouldTerminate'");
     } 
 
-    public void processReadRQPacket(ReadRQPacket readPacket){
-        /*** load content of file in readPacket to var */
-        /** */
-        sendingData = true;
-        // send ACK packet via Connections
-        // send first DATA packet 
+    public BasePacket processReadRQPacket(ReadRQPacket readPacket){
+        try {
+            sendingHandler = new SendingHandler(readPacket.getFileName());
+            sendingData = true;
+            connections.send(currentClientId, new AcknowledgePacket((short)0));
+            return sendingHandler.sendFirst();
+
+        } catch (FileNotFoundException e) {
+            return new ErrorPacket((short)1, "File not found");
+        } catch (IOException e) {
+            return new ErrorPacket((short)0, "Failed to read data from requested file");
+        }
     }
 
     public void processDirPacket(){
         //same as read
     }
 
-    public void processWriteRQPacket(WriteRQPacket writePacket) {
-        receivingData = true;
-        // send ACK
-        
+    public BasePacket processWriteRQPacket(WriteRQPacket writePacket) {
+        try {
+            receivingHandler = new ReceivingHandler(writePacket.getFileName());
+            receivingData = true;
+            return new AcknowledgePacket((short)0);
+        } catch (FileAlreadyExistsException e) {
+            return new ErrorPacket((short)5, "File already exists");
+        } catch (IOException e) {
+            return new ErrorPacket((short)0, "Failed to write to file");
+        }
     }
 
     

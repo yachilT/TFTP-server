@@ -19,11 +19,13 @@ public class TftpBlockingConnectionHandler<T> implements Runnable, ConnectionHan
     private BufferedOutputStream out;
     private volatile boolean connected = true;
     private final ReentrantLock connectionLock = new ReentrantLock();
+    String username;
 
     public TftpBlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocol<T> protocol) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;
+        this.username = null;
     }
 
     @Override
@@ -71,5 +73,14 @@ public class TftpBlockingConnectionHandler<T> implements Runnable, ConnectionHan
     @Override
     public void unlock() {
         connectionLock.unlock();
+    }
+
+    @Override
+    public boolean isLoggedIn() {
+        return username != null;
+    }
+    @Override
+    public void login(String username){
+        this.username = username;
     }
 }
