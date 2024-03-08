@@ -25,7 +25,7 @@ public abstract class BasePacket {
 
 
 
-    public abstract void applyRequest(TftpProtocol protocol);
+    public abstract BasePacket applyRequest(TftpProtocol protocol);
     public abstract byte[] encodePacket();
     public abstract boolean decodeNextByte(byte nextByte);
 

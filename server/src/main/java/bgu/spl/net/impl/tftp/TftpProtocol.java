@@ -128,16 +128,10 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
                 } catch (IOException e) {}
             }
         }
-
-        if (message.getOpCode() == OpCode.RRQ) {
-            returnPacket = processReadRQPacket((ReadRQPacket)message);
-        }
-
-        if (message.getOpCode() == OpCode.WRQ) {
-
-        }
+        returnPacket = message.applyRequest(this);
         //should synchronize acording to type of packet (data)
-        connections.send(currentClientId, returnPacket);
+        if(returnPacket != null)
+            connections.send(currentClientId, returnPacket);
     }
 
     @Override
@@ -174,6 +168,16 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             return new ErrorPacket((short)0, "Failed to write to file");
         }
     }
+    public BasePacket processLoginRQPacket(LoginRQPacket loginPacket){
+        if(connections.isLoggedIn(currentClientId))
+            return new ErrorPacket((short)7, "User already logged in – Login username already connected.");
+        else {
+            connections.login(currentClientId, loginPacket.getUsername());
+            return new AcknowledgePacket((short)0);
+        }
+
+    }
+
 
     
 }

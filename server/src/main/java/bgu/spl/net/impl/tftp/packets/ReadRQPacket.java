@@ -13,7 +13,7 @@ public class ReadRQPacket extends BasePacket {
         this.fileName = null;
     }
     @Override
-    public void applyRequest(TftpProtocol tftp){
+    public BasePacket applyRequest(TftpProtocol tftp){
         tftp.processReadRQPacket(this);
     }
 
