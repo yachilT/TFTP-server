@@ -160,8 +160,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         }
     }
 
-    public void processDirPacket(){
-        //same as read
+    public void processDirPacket(DirectoryRQPacket dirPacket){
     }
 
     public BasePacket processWriteRQPacket(WriteRQPacket writePacket) {
