@@ -17,8 +17,8 @@ public class AcknowledgePacket extends BasePacket {
         this.blockNumber = blockNumber;
     }
     @Override
-    public void applyRequest(TftpProtocol protocol){
-
+    public BasePacket applyRequest(TftpProtocol protocol){
+        return null;
     }
     @Override
     public byte[] encodePacket() {

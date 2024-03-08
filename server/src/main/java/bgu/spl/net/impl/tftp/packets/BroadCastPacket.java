@@ -15,8 +15,8 @@ public class BroadCastPacket extends BasePacket {
         this.fileName = null;
     }
     @Override
-    public void applyRequest(TftpProtocol protocol){
-        
+    public BasePacket applyRequest(TftpProtocol protocol){
+        protocol.pro
     }
     @Override
     public byte[] encodePacket() {

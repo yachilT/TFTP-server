@@ -25,7 +25,7 @@ public class DataPacket extends BasePacket {
 
     @Override
 
-    public void applyRequest(TftpProtocol protocol){
+    public BasePacket applyRequest(TftpProtocol protocol){
     }
 
     public short getBlockNumber() {

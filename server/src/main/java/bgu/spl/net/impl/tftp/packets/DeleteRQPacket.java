@@ -14,7 +14,7 @@ public class DeleteRQPacket extends BasePacket {
         this.fileName = null;
     }
     @Override
-    public void applyRequest(TftpProtocol protocol){
+    public BasePacket applyRequest(TftpProtocol protocol){
 
     }
     @Override

@@ -12,4 +12,6 @@ public interface Connections<T> {
 
     void lock(int connectionId);
     void unlock(int connectionId); // for broadcast
+    boolean isLoggedIn(int connectionId);
+    void login(int connectionId,String username);
 }

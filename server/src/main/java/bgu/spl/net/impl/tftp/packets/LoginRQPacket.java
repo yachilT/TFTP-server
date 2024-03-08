@@ -17,8 +17,8 @@ public class LoginRQPacket extends BasePacket{
         this.username = null;
     }
     @Override
-    public void applyRequest(TftpProtocol tftp){
-
+    public BasePacket applyRequest(TftpProtocol tftp){
+        return tftp.processLoginRQPacket(this);
     }
     @Override
     public byte[] encodePacket(){
@@ -43,5 +43,8 @@ public class LoginRQPacket extends BasePacket{
         username = new String(byteArr, StandardCharsets.UTF_8);
         bytes.clear();
         return true;
+    }
+    public String getUsername() {
+        return username;
     }
 }

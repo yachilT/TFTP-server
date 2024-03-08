@@ -10,7 +10,7 @@ public class DirectoryRQPacket extends BasePacket{
         super(OpCode.DIRQ);
     }
     @Override
-    public void applyRequest(TftpProtocol protocol){ 
+    public BasePacket applyRequest(TftpProtocol protocol){ 
 
     }
     @Override
