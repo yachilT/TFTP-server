@@ -16,10 +16,6 @@ public interface ConnectionHandler<T> extends Closeable {
      * Comment the following lines (both send methods) for the existing implentations to work.
      *
      */
-    void lock();
-    void unlock(); // for broadcast.
-    boolean isLoggedIn();
-    void login(String username);
 
     void send(T msg);
 

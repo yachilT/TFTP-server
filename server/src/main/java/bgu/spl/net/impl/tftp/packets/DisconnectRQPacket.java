@@ -10,7 +10,7 @@ public class DisconnectRQPacket extends BasePacket {
     }
     @Override
     public void applyRequest(TftpProtocol protocol){
-        
+        protocol.processDisconnectRQPacket(this);
     }
     @Override
     public byte[] encodePacket() {

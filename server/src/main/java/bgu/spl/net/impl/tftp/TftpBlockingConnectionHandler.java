@@ -58,30 +58,12 @@ public class TftpBlockingConnectionHandler<T> implements Runnable, ConnectionHan
 
     @Override
     public void send(T msg) {
-        if (msg != null) 
-            try {
-                out.write(encdec.encode(msg));
-                out.flush();
-            } catch (IOException e) {}
-        
-    }
-
-    @Override
-    public void lock() {
-        connectionLock.lock();
-    }
-
-    @Override
-    public void unlock() {
-        connectionLock.unlock();
-    }
-
-    @Override
-    public boolean isLoggedIn() {
-        return username != null;
-    }
-    @Override
-    public void login(String username){
-        this.username = username;
+        synchronized(out){
+            if (msg != null) 
+                try {
+                    out.write(encdec.encode(msg));
+                    out.flush();
+                } catch (IOException e) {}
+        }
     }
 }

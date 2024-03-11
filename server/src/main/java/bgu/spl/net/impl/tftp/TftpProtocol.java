@@ -21,22 +21,19 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private Connections<BasePacket> connections;
     private int currentClientId;
     private boolean isTerminated;
+    private boolean sendingData;
+    private DataSender dataSender;
+
+    private boolean receivingData;
+    private FileReceiver dataReceiver;
+    private String username;
 
     public TftpProtocol(Connections<BasePacket> connections, int currentClientId){
         this.connections = connections;
         this.currentClientId = currentClientId;
         this.isTerminated = false;
+        this.username = null;
     }
-
-    public int getCurrentId(){
-        return currentClientId;
-    }
-    boolean sendingData;
-    DataSender dataSender;
-
-    boolean receivingData;
-    FileReceiver dataReceiver;
-
     public TftpProtocol() {
         this.sendingData = false;
         this.dataSender = null;
@@ -85,10 +82,6 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             }
         }
         message.applyRequest(this);
-
-        //should synchronize acording to type of packet (data)
-        if(returnPacket != null)
-            connections.send(currentClientId, returnPacket);
     }
 
     @Override
@@ -155,10 +148,10 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
     public void processLoginRQPacket(LoginRQPacket loginPacket){
         BasePacket returnPacket;
-        if(connections.isLoggedIn(currentClientId))
+        if(username != null)
             returnPacket = new ErrorPacket((short)7, "User already logged in");
         else {
-            connections.login(currentClientId, loginPacket.getUsername());
+            username = loginPacket.getUsername();
             returnPacket = new AcknowledgePacket((short)0);
         }
 
@@ -187,10 +180,10 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         
         
     }
-    public BasePacket processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){
+    public void processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){
         BasePacket returnPacket = new AcknowledgePacket();
         terminate();
-        return returnPacket;
+        connections.send(currentClientId, returnPacket);
     }
     public BasePacket processDeleteRQPacket(DeleteRQPacket deletePacket){
         return null;

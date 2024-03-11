@@ -11,8 +11,4 @@ public interface Connections<T> {
     void disconnect(int connectionId);
 
     Set<Integer> getKeys();
-    void lock(int connectionId);
-    void unlock(int connectionId); // for broadcast
-    boolean isLoggedIn(int connectionId);
-    void login(int connectionId,String username);
 }
