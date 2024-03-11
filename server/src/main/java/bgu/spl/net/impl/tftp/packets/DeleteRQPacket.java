@@ -15,7 +15,7 @@ public class DeleteRQPacket extends BasePacket {
     }
     @Override
     public BasePacket applyRequest(TftpProtocol protocol){
-
+        return protocol.processDeleteRQPacket(this);
     }
     @Override
     public byte[] encodePacket() {

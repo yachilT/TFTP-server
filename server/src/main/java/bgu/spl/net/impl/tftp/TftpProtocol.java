@@ -14,7 +14,17 @@ import bgu.spl.net.srv.Connections;
 public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private Connections<BasePacket> connections;
     private int currentClientId;
+    private boolean isTerminated;
 
+    public TftpProtocol(Connections<BasePacket> connections, int currentClientId){
+        this.connections = connections;
+        this.currentClientId = currentClientId;
+        this.isTerminated = false;
+    }
+
+    public int getCurrentId(){
+        return currentClientId;
+    }
     private class SendingHandler {
         private FileInputStream reader;
 
@@ -136,10 +146,17 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
     @Override
     public boolean shouldTerminate() {
-        // TODO implement this
-        throw new UnsupportedOperationException("Unimplemented method 'shouldTerminate'");
+        return isTerminated;
     } 
 
+    private void  terminate(){
+        isTerminated = true;
+    }
+    @Override
+    public void disconnect() {
+        connections.disconnect(currentClientId);
+    }
+    
     public BasePacket processReadRQPacket(ReadRQPacket readPacket){
         try {
             sendingHandler = new SendingHandler(readPacket.getFileName());
@@ -177,6 +194,15 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         }
 
     }
+    public BasePacket processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){
+        BasePacket returnPacket = new AcknowledgePacket();
+        terminate();
+        return returnPacket;
+    }
+    public BasePacket processDeleteRQPacket(DeleteRQPacket deletePacket){
+        return null;
+    }
+
 
 
     
