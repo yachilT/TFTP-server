@@ -14,7 +14,10 @@ public class ReadRQPacket extends BasePacket {
     }
     @Override
     public void applyRequest(TftpProtocol tftp){
-        tftp.processReadRQPacket(this);
+        if(tftp.isLoggedIn())
+            tftp.processReadRQPacket(this);
+        else   
+            tftp.sendsErrorNotLoggedIn();
     }
 
     public String getFileName() {

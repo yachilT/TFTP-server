@@ -19,7 +19,10 @@ public class DeleteRQPacket extends BasePacket {
     }
     @Override
     public void applyRequest(TftpProtocol protocol){
-        protocol.processDelPacket(this);
+        if(protocol.isLoggedIn())
+            protocol.processDelPacket(this);
+        else
+            protocol.sendsErrorNotLoggedIn();
     }
     @Override
     public byte[] encodePacket() {

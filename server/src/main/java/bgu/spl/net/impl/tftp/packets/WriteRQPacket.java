@@ -14,7 +14,10 @@ public class WriteRQPacket extends BasePacket {
     }
     @Override
     public void applyRequest(TftpProtocol protocol){
-        protocol.processWriteRQPacket(this);
+        if(protocol.isLoggedIn())
+            protocol.processWriteRQPacket(this);
+        else
+            protocol.sendsErrorNotLoggedIn();
     }
 
     public String getFileName() {

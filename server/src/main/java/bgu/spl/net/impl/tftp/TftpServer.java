@@ -16,6 +16,7 @@ public class TftpServer implements Server<BasePacket>{
     private final Supplier<BidiMessagingProtocol<BasePacket>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<BasePacket>> encdecFactory;
     private ServerSocket sock;
+    private int connectionsCounter;
 
     public TftpServer(
             int port,
@@ -26,6 +27,7 @@ public class TftpServer implements Server<BasePacket>{
         this.protocolFactory = protocolFactory;
         this.encdecFactory = encdecFactory;
 		this.sock = null;
+        connectionsCounter = 0;
     }
 
     @Override
@@ -39,7 +41,8 @@ public class TftpServer implements Server<BasePacket>{
             while (!Thread.currentThread().isInterrupted()) {
 
                 Socket clientSock = serverSock.accept();
-
+                BidiMessagingProtocol<BasePacket> protocol = protocolFactory.get(); 
+                protocol.start(connectionsCounter++, null);
                 TftpBlockingConnectionHandler<BasePacket> handler = new TftpBlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
