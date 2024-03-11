@@ -144,20 +144,6 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
         connections.send(currentClientId, returnPacket);
     }
-
-
-    public void processLoginRQPacket(LoginRQPacket loginPacket){
-        BasePacket returnPacket;
-        if(username != null)
-            returnPacket = new ErrorPacket((short)7, "User already logged in");
-        else {
-            username = loginPacket.getUsername();
-            returnPacket = new AcknowledgePacket((short)0);
-        }
-
-        connections.send(currentClientId, returnPacket);
-    }
-
     public void processDelPacket(DeleteRQPacket deleteRQPacket) {
         File file = new File(deleteRQPacket.getFileName());
         if (!file.exists()) {
@@ -180,6 +166,17 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         
         
     }
+    public void processLoginRQPacket(LoginRQPacket loginPacket){
+        BasePacket returnPacket;
+        if(username != null)
+            returnPacket = new ErrorPacket((short)7, "User already logged in");
+        else {
+            username = loginPacket.getUsername();
+            returnPacket = new AcknowledgePacket((short)0);
+        }
+
+        connections.send(currentClientId, returnPacket);
+    }
     public void processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){
         BasePacket returnPacket = new AcknowledgePacket();
         terminate();
@@ -188,6 +185,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     public BasePacket processDeleteRQPacket(DeleteRQPacket deletePacket){
         return null;
     }
+
 
 
 
