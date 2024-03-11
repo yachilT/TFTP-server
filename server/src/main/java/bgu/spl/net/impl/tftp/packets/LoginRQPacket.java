@@ -2,8 +2,6 @@ package bgu.spl.net.impl.tftp.packets;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
 
 import bgu.spl.net.impl.tftp.OpCode;
 import bgu.spl.net.impl.tftp.TftpProtocol;
@@ -17,8 +15,8 @@ public class LoginRQPacket extends BasePacket{
         this.username = null;
     }
     @Override
-    public BasePacket applyRequest(TftpProtocol tftp){
-        return tftp.processLoginRQPacket(this);
+    public void applyRequest(TftpProtocol tftp){
+        tftp.processLoginRQPacket(this);
     }
     @Override
     public byte[] encodePacket(){

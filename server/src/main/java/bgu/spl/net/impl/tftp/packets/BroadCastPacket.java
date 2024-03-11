@@ -14,10 +14,13 @@ public class BroadCastPacket extends BasePacket {
         this.added = false;
         this.fileName = null;
     }
+
+    public BroadCastPacket(boolean added, String fileName)
     @Override
-    public BasePacket applyRequest(TftpProtocol protocol){
-        protocol.pro
+    public void applyRequest(TftpProtocol protocol){
+        protocol.processBcastPacket(this);
     }
+    
     @Override
     public byte[] encodePacket() {
         byte[] result;

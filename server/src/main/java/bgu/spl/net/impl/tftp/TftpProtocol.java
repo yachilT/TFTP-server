@@ -6,88 +6,34 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import bgu.spl.net.api.BidiMessagingProtocol;
 import bgu.spl.net.impl.tftp.packets.*;
+import bgu.spl.net.impl.tftp.transferdatapackets.DataSender;
+import bgu.spl.net.impl.tftp.transferdatapackets.DirectorySender;
+import bgu.spl.net.impl.tftp.transferdatapackets.FileReceiver;
+import bgu.spl.net.impl.tftp.transferdatapackets.FileSender;
 import bgu.spl.net.srv.Connections;
 
 public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private Connections<BasePacket> connections;
     private int currentClientId;
 
-    private class SendingHandler {
-        private FileInputStream reader;
-
-        private DataPacket lastDataPacket;
-
-        public SendingHandler(String name) throws FileNotFoundException {
-            this.reader = new FileInputStream(name);
-            lastDataPacket = null;
-        }
-
-        public DataPacket sendFirst() throws IOException {
-            byte[] data = reader.readNBytes(DataPacket.MAX_DATA_SIZE);
-            lastDataPacket = new DataPacket((short)0, data);
-            return lastDataPacket;
-        }
-
-        public DataPacket sendNext(AcknowledgePacket ACKPacket) throws IOException, IllegalArgumentException {
-            if (ACKPacket.getBlockNumber() != lastDataPacket.getBlockNumber()) {
-                throw new IllegalArgumentException("Incorrect ACKPacket");
-            }
-            if (reader.available() == 0) {
-                return null;
-            }
-            byte[] data = reader.readNBytes(DataPacket.MAX_DATA_SIZE);
-            lastDataPacket = new DataPacket((short)(lastDataPacket.getBlockNumber() + 1), data);
-            return lastDataPacket;
-        }
-
-        public void error() throws IOException {
-            reader.close();
-            
-        }
-
-        public void close() throws IOException {
-            reader.close();
-        }
-    }
-
-    private class ReceivingHandler {
-        private File workingFile;
-        private FileOutputStream writer;
-
-        public ReceivingHandler(String name) throws IOException {
-            workingFile = new File(name);
-            if (!workingFile.createNewFile())
-                throw new FileAlreadyExistsException(name);
-                
-            writer = new FileOutputStream(workingFile);
-        }
-
-        public AcknowledgePacket receive(DataPacket packet) throws IOException {
-            byte[] b = packet.getData();
-            writer.write(b);
-
-            return new AcknowledgePacket(packet.getBlockNumber());
-        }
-
-        public void error() throws IOException {
-            writer.close();
-            workingFile.delete();
-        }
-
-        public void close() throws IOException {
-            writer.close();
-        }
-    }
-
     boolean sendingData;
-    SendingHandler sendingHandler;
+    DataSender dataSender;
 
     boolean receivingData;
-    ReceivingHandler receivingHandler;
+    FileReceiver dataReceiver;
 
+    public TftpProtocol() {
+        this.sendingData = false;
+        this.dataSender = null;
+    
+        this.receivingData = false;
+        this.dataReceiver = null;
+    }
     @Override
     public void start(int connectionId, Connections<BasePacket> connections) {
         this.currentClientId = connectionId;
@@ -100,14 +46,14 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         if (sendingData){
             if (message.getOpCode() == OpCode.ACK) {
                 try {
-                    returnPacket = sendingHandler.sendNext((AcknowledgePacket)message);
+                    returnPacket = dataSender.sendNext((AcknowledgePacket)message);
                 } catch (IllegalArgumentException e) {
                     returnPacket = new ErrorPacket((short)0, "Incorrect block number from ACK");
                 } catch (IOException e) {
                     returnPacket = new ErrorPacket((short)0, "Failed to read data from requested file");
-                }
-                if (returnPacket == null)
+                } catch (NoSuchElementException e) {
                     sendingData = false;
+                }
             }
             else
                 returnPacket = new ErrorPacket((short)0, "Unexpected packet, expected ACK packet");
@@ -116,7 +62,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         if (receivingData) {
             if (message.getOpCode() == OpCode.DATA) {
                 try {
-                    returnPacket = receivingHandler.receive((DataPacket)message);
+                    returnPacket = dataReceiver.receive((DataPacket)message);
                 } catch (IOException e) {
                     returnPacket = new ErrorPacket((short)0, "Failed to write data from requested file");
                 }
@@ -124,11 +70,12 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
             else {
                 receivingData = false;
                 try {
-                    receivingHandler.close();
+                    dataReceiver.close();
                 } catch (IOException e) {}
             }
         }
-        returnPacket = message.applyRequest(this);
+        message.applyRequest(this);
+
         //should synchronize acording to type of packet (data)
         if(returnPacket != null)
             connections.send(currentClientId, returnPacket);
@@ -142,10 +89,10 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
     public BasePacket processReadRQPacket(ReadRQPacket readPacket){
         try {
-            sendingHandler = new SendingHandler(readPacket.getFileName());
+            dataSender = new FileSender(readPacket.getFileName());
             sendingData = true;
             connections.send(currentClientId, new AcknowledgePacket((short)0));
-            return sendingHandler.sendFirst();
+            return dataSender.sendFirst();
 
         } catch (FileNotFoundException e) {
             return new ErrorPacket((short)1, "File not found");
@@ -155,27 +102,73 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     }
 
     public void processDirPacket(DirectoryRQPacket dirPacket){
+        BasePacket returnPacket;
+        try {
+            dataSender = new DirectorySender();
+            sendingData = true;
+            connections.send(currentClientId, new AcknowledgePacket((short)0));
+            returnPacket = dataSender.sendFirst();
+        }
+        catch (FileNotFoundException e) {
+            returnPacket = new ErrorPacket((short)1, "Couldn't locate files directory");
+        }
+        catch (IOException e) {
+            returnPacket = new ErrorPacket((short)0, "Failed to load files in directory");
+        }
+
+        connections.send(currentClientId, returnPacket);
     }
 
-    public BasePacket processWriteRQPacket(WriteRQPacket writePacket) {
+
+    public void processWriteRQPacket(WriteRQPacket writePacket) {
+        BasePacket returnPacket;
         try {
-            receivingHandler = new ReceivingHandler(writePacket.getFileName());
+            dataReceiver = new FileReceiver(writePacket.getFileName());
             receivingData = true;
-            return new AcknowledgePacket((short)0);
+            returnPacket = new AcknowledgePacket((short)0);
         } catch (FileAlreadyExistsException e) {
-            return new ErrorPacket((short)5, "File already exists");
+            returnPacket = new ErrorPacket((short)5, "File already exists");
         } catch (IOException e) {
-            return new ErrorPacket((short)0, "Failed to write to file");
+            returnPacket = new ErrorPacket((short)0, "Failed to write to file");
         }
+
+        connections.send(currentClientId, returnPacket);
     }
-    public BasePacket processLoginRQPacket(LoginRQPacket loginPacket){
+
+
+    public void processLoginRQPacket(LoginRQPacket loginPacket){
+        BasePacket returnPacket;
         if(connections.isLoggedIn(currentClientId))
-            return new ErrorPacket((short)7, "User already logged in – Login username already connected.");
+            returnPacket = new ErrorPacket((short)7, "User already logged in");
         else {
             connections.login(currentClientId, loginPacket.getUsername());
-            return new AcknowledgePacket((short)0);
+            returnPacket = new AcknowledgePacket((short)0);
         }
 
+        connections.send(currentClientId, returnPacket);
+    }
+
+    public void processDelPacket(DeleteRQPacket deleteRQPacket) {
+        File file = new File(deleteRQPacket.getFileName());
+        if (!file.exists()) {
+            connections.send(currentClientId, new ErrorPacket((short)1, "File not found"));
+        }
+        else if (!file.delete()) {
+            connections.send(currentClientId, new ErrorPacket((short)2, "File cannot be deleted"));
+        }
+        else {
+            connections.send(currentClientId, new AcknowledgePacket((short)0));
+
+            BasePacket bcast = new BroadCastPacket()
+            Set<Integer> keySet = connections.getKeys();
+            Integer id = currentClientId;
+            keySet.remove(id);
+            for (Integer key : keySet) {
+                connections.send(key, )
+            }
+        }
+        
+        
     }
 
 

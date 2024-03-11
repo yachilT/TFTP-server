@@ -20,8 +20,8 @@ public class ErrorPacket extends BasePacket {
         errorCode = -1;
     }
     @Override
-    public BasePacket applyRequest(TftpProtocol protocol){
-        return null;
+    public void applyRequest(TftpProtocol protocol){
+        
     }
     @Override
     public byte[] encodePacket() {

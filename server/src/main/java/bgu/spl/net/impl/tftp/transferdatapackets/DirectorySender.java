@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import bgu.spl.net.impl.tftp.packets.DataPacket;
 
@@ -31,9 +32,9 @@ public class DirectorySender extends DataSender {
     }
 
     @Override
-    protected DataPacket getNextPacket(short blockNumber) throws IOException {
+    protected DataPacket getNextPacket(short blockNumber) throws IOException, NoSuchElementException {
         if (bytes.isEmpty())
-        return null;
+            throw new NoSuchElementException();
         byte[] dataToSend = new byte[Math.min(bytes.size(), DataPacket.MAX_DATA_SIZE)];
         
         for (int i = 0; i < dataToSend.length; i++) {

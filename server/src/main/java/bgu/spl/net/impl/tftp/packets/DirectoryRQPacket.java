@@ -1,7 +1,5 @@
 package bgu.spl.net.impl.tftp.packets;
 
-import java.nio.charset.StandardCharsets;
-
 import bgu.spl.net.impl.tftp.OpCode;
 import bgu.spl.net.impl.tftp.TftpProtocol;
 
@@ -10,8 +8,8 @@ public class DirectoryRQPacket extends BasePacket{
         super(OpCode.DIRQ);
     }
     @Override
-    public BasePacket applyRequest(TftpProtocol protocol){ 
-
+    public void applyRequest(TftpProtocol protocol){ 
+        protocol.processDirPacket(this);
     }
     @Override
     public byte[] encodePacket() {

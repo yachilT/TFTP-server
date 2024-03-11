@@ -3,6 +3,7 @@ package bgu.spl.net.impl.tftp.transferdatapackets;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import bgu.spl.net.impl.tftp.packets.DataPacket;
 
@@ -15,9 +16,9 @@ public class FileSender extends DataSender {
     }
 
     @Override
-    protected DataPacket getNextPacket(short blockNumber) throws IOException {
+    protected DataPacket getNextPacket(short blockNumber) throws IOException, NoSuchElementException {
         if (reader.available() == 0) {
-            return null;
+            throw new NoSuchElementException();
         }
         byte[] data = reader.readNBytes(DataPacket.MAX_DATA_SIZE);
         return new DataPacket((short)blockNumber, data);

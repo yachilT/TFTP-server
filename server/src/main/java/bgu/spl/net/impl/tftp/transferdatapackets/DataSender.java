@@ -1,5 +1,6 @@
 package bgu.spl.net.impl.tftp.transferdatapackets;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import bgu.spl.net.impl.tftp.packets.AcknowledgePacket;
 import bgu.spl.net.impl.tftp.packets.DataPacket;
@@ -12,14 +13,14 @@ public abstract class DataSender {
         lastDataPacket = null;
     }
 
-    protected abstract DataPacket getNextPacket(short blockNumber) throws IOException;
+    protected abstract DataPacket getNextPacket(short blockNumber) throws IOException, NoSuchElementException;
 
     public DataPacket sendFirst() throws IOException { // definde what to do if there isnt data on first try
         lastDataPacket = getNextPacket((short)0);
         return lastDataPacket;
     }
 
-    public DataPacket sendNext(AcknowledgePacket ACKPacket) throws IOException, IllegalArgumentException {
+    public DataPacket sendNext(AcknowledgePacket ACKPacket) throws IOException, IllegalArgumentException, NoSuchElementException {
         if (ACKPacket.getBlockNumber() != lastDataPacket.getBlockNumber()) {
             throw new IllegalArgumentException("Incorrect ACKPacket");
         }

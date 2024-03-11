@@ -1,5 +1,7 @@
 package bgu.spl.net.srv;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 public class ConnectionsImpl<T> implements Connections <T > {
@@ -18,7 +20,7 @@ public class ConnectionsImpl<T> implements Connections <T > {
         }
         return false;
     }
-
+    
     @Override
     public void disconnect(int connectionId) {
         connections.remove(connectionId);
@@ -42,6 +44,11 @@ public class ConnectionsImpl<T> implements Connections <T > {
     @Override
     public void login(int connectionId, String username) {
         connections.get(connectionId).login(username);
+    }
+
+    @Override
+    public Set<Integer> getKeys() {
+        return connections.keySet();
     }
 
     

@@ -10,7 +10,7 @@ import bgu.spl.net.impl.tftp.packets.BasePacket;
 import bgu.spl.net.srv.Server;
 
 
-public class TftpServer implements Server{
+public class TftpServer implements Server<BasePacket>{
     
     private final int port;
     private final Supplier<BidiMessagingProtocol<BasePacket>> protocolFactory;

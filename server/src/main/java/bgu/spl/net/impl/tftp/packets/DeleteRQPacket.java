@@ -13,9 +13,13 @@ public class DeleteRQPacket extends BasePacket {
         super(OpCode.DELRQ);
         this.fileName = null;
     }
-    @Override
-    public BasePacket applyRequest(TftpProtocol protocol){
 
+    public String getFileName() {
+        return fileName;
+    }
+    @Override
+    public void applyRequest(TftpProtocol protocol){
+        protocol.processDelPacket(this);
     }
     @Override
     public byte[] encodePacket() {

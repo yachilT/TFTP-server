@@ -9,7 +9,7 @@ public class DisconnectRQPacket extends BasePacket {
         super(OpCode.DISC);
     }
     @Override
-    public BasePacket applyRequest(TftpProtocol protocol){
+    public void applyRequest(TftpProtocol protocol){
 
     }
     @Override

@@ -13,8 +13,8 @@ public class WriteRQPacket extends BasePacket {
         this.fileName = null;
     }
     @Override
-    public BasePacket applyRequest(TftpProtocol protocol){
-
+    public void applyRequest(TftpProtocol protocol){
+        protocol.processWriteRQPacket(this);
     }
 
     public String getFileName() {
