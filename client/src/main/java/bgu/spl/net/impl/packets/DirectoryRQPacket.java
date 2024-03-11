@@ -1,7 +1,5 @@
 package bgu.spl.net.impl.packets;
 
-import bgu.spl.net.impl.packets.OpCode;
-
 
 public class DirectoryRQPacket extends BasePacket{
     public DirectoryRQPacket(){

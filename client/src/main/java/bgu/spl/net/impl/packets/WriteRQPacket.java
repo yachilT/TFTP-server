@@ -3,7 +3,6 @@ package bgu.spl.net.impl.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import bgu.spl.net.impl.packets.OpCode;
 
 public class WriteRQPacket extends BasePacket {
     private String fileName;
@@ -11,9 +10,9 @@ public class WriteRQPacket extends BasePacket {
         super(OpCode.WRQ);
         this.fileName = null;
     }
-    public WriteRQPacket(String filename) {
+    public WriteRQPacket(String fileName){
         super(OpCode.WRQ);
-        this.fileName = filename;
+        this.fileName = fileName;
     }
     // @Override
     // public void applyRequest(TftpProtocol protocol){

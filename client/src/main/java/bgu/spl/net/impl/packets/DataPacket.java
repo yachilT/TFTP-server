@@ -1,9 +1,8 @@
 package bgu.spl.net.impl.packets;
 
-import bgu.spl.net.impl.packets.OpCode;
 
 public class DataPacket extends BasePacket {
-    public static final short MAX_DATA_SIZE = 511;
+    public static final short MAX_DATA_SIZE = 512;
 
     private short blockNumber;
     private short size;
@@ -46,23 +45,22 @@ public class DataPacket extends BasePacket {
     @Override
     public boolean decodeNextByte(byte nextByte){
         bytes.add(nextByte);
-        length++;
-        if(length == 4){
-            size = convert2BytesToShort(bytes.get(0), bytes.get(1));
-            bytes.clear();
-            return false;
-        }
-        if(length == 6){
-            blockNumber = convert2BytesToShort(bytes.get(0), bytes.get(1));
-            bytes.clear();
-            return size == 0;
-        }
-        if(bytes.size() == size){
+
+        if (blockNumber != -1 && size == bytes.size()) {
             data = convertListToByteArr(bytes);
             bytes.clear();
             return true;
         }
-
+        else if (bytes.size() == 2) {
+            if (size == -1) {
+                size = convert2BytesToShort(bytes.get(0), bytes.get(1));
+                bytes.clear();
+            }
+            else if (blockNumber == -1) {
+                blockNumber = convert2BytesToShort(bytes.get(0), bytes.get(1));
+                bytes.clear();
+            }
+        }
         return false;
     }
     public short getSize(){

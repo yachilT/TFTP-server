@@ -3,7 +3,6 @@ package bgu.spl.net.impl.packets;
 import java.util.LinkedList;
 import java.util.List;
 
-import bgu.spl.net.impl.packets.OpCode;
 
 public abstract class BasePacket {
     protected final static byte[] ZERO = new byte[]{(byte) 0};
@@ -24,7 +23,7 @@ public abstract class BasePacket {
 
 
 
-    //public abstract void applyRequest(TftpProtocol protocol);
+    // public abstract void applyRequest(TftpProtocol protocol);
     public abstract byte[] encodePacket();
     public abstract boolean decodeNextByte(byte nextByte);
 
@@ -35,9 +34,11 @@ public abstract class BasePacket {
     protected byte[] convertShortToBytes(short num){
         return new byte[]{(byte) (num >> 8), (byte) (num & 0xff)};
     }
+
     protected short convert2BytesToShort(byte b1, byte b2) {
         return (short) ((short)((b1 & 0xFF) << 8) | (short)(b2 & 0xFF));
     } 
+    
     protected byte[] mergeArrays(byte[] arr1, byte[] arr2){
         byte[] merge = new byte[arr1.length + arr2.length];
         int index = 0;
@@ -52,12 +53,16 @@ public abstract class BasePacket {
 
     protected byte[] convertListToByteArr(List<Byte> bytes) {
         byte[] arr = new byte[bytes.size()];
-        int i = 0;
-        for (byte b : bytes) {
-            arr[i] = b;
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = bytes.remove(0);
         }
 
         return arr;
+    }
+
+    @Override
+    public String toString() {
+        return opcode.name();
     }
 
 }

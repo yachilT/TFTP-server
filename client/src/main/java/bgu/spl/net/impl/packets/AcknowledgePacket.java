@@ -1,8 +1,6 @@
 package bgu.spl.net.impl.packets;
 
 
-import bgu.spl.net.impl.packets.OpCode;
-
 public class AcknowledgePacket extends BasePacket {
     private short blockNumber;
 
@@ -20,7 +18,6 @@ public class AcknowledgePacket extends BasePacket {
         
     // }
     @Override
-    
     public byte[] encodePacket() {
         byte[] result;
         result = convertShortToBytes((short)opcode.ordinal()); // opcode

@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
+import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.impl.packets.*;
 
 public class TftpClient {
@@ -22,6 +23,8 @@ public class TftpClient {
         BufferedOutputStream out = null;
         BlockingQueue<BasePacket> packetsToSend = new LinkedBlockingDeque<>();
         MessageEncoderDecoder<BasePacket> encdec = new TftpMessageEncoderDecoder();
+        MessagingProtocol<BasePacket> protocol = new TftpMessagingProtocol();
+        
 
         try {
             sock = new Socket(serverIp, serverPort);
@@ -29,7 +32,7 @@ public class TftpClient {
         } 
         catch (UnknownHostException e) {e.printStackTrace();}
         catch (IOException e) { e.printStackTrace();}
-        Thread listenerServerThread = new Thread(new ServerListener(sock , new TftpMessageEncoderDecoder(), new TftpMessagingProtocol(), packetsToSend));
+        Thread listenerServerThread = new Thread(new ServerListener(sock , encdec, protocol, packetsToSend));
         listenerServerThread.start();
         
         while(!terminate){

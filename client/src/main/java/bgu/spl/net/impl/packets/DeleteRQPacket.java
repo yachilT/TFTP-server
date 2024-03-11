@@ -3,7 +3,6 @@ package bgu.spl.net.impl.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import bgu.spl.net.impl.packets.OpCode;
 
 public class DeleteRQPacket extends BasePacket {
     private String fileName;
@@ -12,11 +11,10 @@ public class DeleteRQPacket extends BasePacket {
         super(OpCode.DELRQ);
         this.fileName = null;
     }
-    public DeleteRQPacket(String fileName){
+    public DeleteRQPacket(String filename){
         super(OpCode.DELRQ);
-        this.fileName = fileName;
+        this.fileName = filename;
     }
-
     public String getFileName() {
         return fileName;
     }

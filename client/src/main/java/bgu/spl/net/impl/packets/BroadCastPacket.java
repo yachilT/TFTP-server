@@ -3,7 +3,6 @@ package bgu.spl.net.impl.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import bgu.spl.net.impl.packets.OpCode;
 
 public class BroadCastPacket extends BasePacket {
     private boolean added;

@@ -3,7 +3,6 @@ package bgu.spl.net.impl.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import bgu.spl.net.impl.packets.OpCode;
 
 public class ErrorPacket extends BasePacket {
     short errorCode;
@@ -18,6 +17,10 @@ public class ErrorPacket extends BasePacket {
         errMsg = null;
         errorCode = -1;
     }
+    // @Override
+    // public void applyRequest(TftpProtocol protocol){
+        
+    // }
     @Override
     public byte[] encodePacket() {
         byte[] result;
