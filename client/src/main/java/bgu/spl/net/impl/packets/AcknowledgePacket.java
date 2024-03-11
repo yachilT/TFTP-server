@@ -1,7 +1,7 @@
-package bgu.spl.net.impl.tftp.packets;
+package bgu.spl.net.impl.packets;
 
 
-import bgu.spl.net.impl.tftp.TftpProtocol;
+import bgu.spl.net.impl.packets.OpCode;
 
 public class AcknowledgePacket extends BasePacket {
     private short blockNumber;
@@ -15,11 +15,12 @@ public class AcknowledgePacket extends BasePacket {
         super(OpCode.ACK);
         this.blockNumber = blockNumber;
     }
-    @Override
-    public void applyRequest(TftpProtocol protocol){
+    // @Override
+    // public void applyRequest(TftpProtocol protocol){
         
-    }
+    // }
     @Override
+    
     public byte[] encodePacket() {
         byte[] result;
         result = convertShortToBytes((short)opcode.ordinal()); // opcode

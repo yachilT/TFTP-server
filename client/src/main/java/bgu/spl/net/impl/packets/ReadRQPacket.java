@@ -1,9 +1,9 @@
-package bgu.spl.net.impl.tftp.packets;
+package bgu.spl.net.impl.packets;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import bgu.spl.net.impl.tftp.TftpProtocol;
+import bgu.spl.net.impl.packets.OpCode;
 
 public class ReadRQPacket extends BasePacket {
     private String fileName;
@@ -11,15 +11,19 @@ public class ReadRQPacket extends BasePacket {
         super(OpCode.RRQ);
         this.fileName = null;
     }
-    @Override
-    public void applyRequest(TftpProtocol tftp){
-        if(tftp.isLoggedIn())
-            tftp.processReadRQPacket(this);
-        else   
-            tftp.sendsErrorNotLoggedIn();
+    public ReadRQPacket(String fileName){
+        super(OpCode.RRQ);
+        this.fileName = fileName;
     }
+    // @Override
+    // public void applyRequest(TftpProtocol tftp){
+    //     if(tftp.isLoggedIn())
+    //         tftp.processReadRQPacket(this);
+    //     else   
+    //         tftp.sendsErrorNotLoggedIn();
+    // }
 
-    public String getFileName() {
+    public String getFileName(){
         return fileName;
     }
 
@@ -36,7 +40,6 @@ public class ReadRQPacket extends BasePacket {
     }
     @Override
     public boolean decodeNextByte(byte nextByte){
-        System.out.print(nextByte + " ");
         if(nextByte != 0){
             bytes.add(nextByte);
             length++;
@@ -45,7 +48,6 @@ public class ReadRQPacket extends BasePacket {
         byte[] byteArr = convertListToByteArr(bytes);
         bytes.clear();
         fileName = new String(byteArr, StandardCharsets.UTF_8);
-        System.out.println("\n" + fileName);
         return true;
     }
 }

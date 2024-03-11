@@ -1,17 +1,15 @@
-package bgu.spl.net.impl.tftp.packets;
+package bgu.spl.net.impl.packets;
 
-import bgu.spl.net.impl.tftp.TftpProtocol;
+import bgu.spl.net.impl.packets.OpCode;
+
 
 public class DisconnectRQPacket extends BasePacket {
 
     public DisconnectRQPacket(){
         super(OpCode.DISC);
     }
-    @Override
-    public void applyRequest(TftpProtocol protocol){
-        System.out.println("proccessing disconnet");
-        protocol.processDisconnectRQPacket(this);
-    }
+
+    
     @Override
     public byte[] encodePacket() {
         return convertShortToBytes((short)opcode.ordinal()); // opcode
