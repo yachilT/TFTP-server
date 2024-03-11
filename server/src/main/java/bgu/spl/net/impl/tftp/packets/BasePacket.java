@@ -45,7 +45,7 @@ public abstract class BasePacket {
         byte[] merge = new byte[arr1.length + arr2.length];
         int index = 0;
         for (byte b : arr1) {
-            merge[index++] = b;
+            merge[index++] = b; 
         }
         for (byte b : arr2) {
             merge[index++] = b;
