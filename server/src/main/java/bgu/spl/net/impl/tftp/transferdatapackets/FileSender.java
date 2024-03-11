@@ -9,10 +9,12 @@ import bgu.spl.net.impl.tftp.packets.DataPacket;
 
 public class FileSender extends DataSender {
     private FileInputStream reader;
-    private final String FILES_PATH = "Flies";
+    private final String FILES_PATH = "server/Flies";
 
     public FileSender(String name) throws FileNotFoundException {
-        this.reader = new FileInputStream(FILES_PATH + "\\" + name);
+        System.out.println("searching for " + FILES_PATH + "/" + name);
+        this.reader = new FileInputStream(FILES_PATH + "/" + name);
+        System.out.println("Found " + name);
         lastDataPacket = null;
     }
 

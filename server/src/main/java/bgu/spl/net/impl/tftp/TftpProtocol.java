@@ -121,7 +121,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     
     public void processReadRQPacket(ReadRQPacket readPacket){
         try {
-            dataSender = new FileSender(readPacket.getFileName());
+            dataSender = new FileSender("server/Flies/" + readPacket.getFileName());
             sendingData = true;
             connections.send(currentClientId, new AcknowledgePacket((short)0));
             connections.send(currentClientId, dataSender.sendFirst());
