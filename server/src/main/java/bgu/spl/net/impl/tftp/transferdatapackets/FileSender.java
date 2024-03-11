@@ -12,7 +12,6 @@ public class FileSender extends DataSender {
     private final String FILES_PATH = "server/Flies";
 
     public FileSender(String name) throws FileNotFoundException {
-        System.out.println("searching for " + FILES_PATH + "/" + name);
         this.reader = new FileInputStream(FILES_PATH + "/" + name);
         System.out.println("Found " + name);
         lastDataPacket = null;

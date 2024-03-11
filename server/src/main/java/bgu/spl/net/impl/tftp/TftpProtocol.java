@@ -121,7 +121,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     
     public void processReadRQPacket(ReadRQPacket readPacket){
         try {
-            dataSender = new FileSender("server/Flies/" + readPacket.getFileName());
+            dataSender = new FileSender(readPacket.getFileName());
             sendingData = true;
             connections.send(currentClientId, new AcknowledgePacket((short)0));
             connections.send(currentClientId, dataSender.sendFirst());
@@ -169,7 +169,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     }
 
     public void processDelPacket(DeleteRQPacket deleteRQPacket) {
-        File file = new File(deleteRQPacket.getFileName());
+        File file = new File("server/Flies/" + deleteRQPacket.getFileName());
         if (!file.exists()) {
             connections.send(currentClientId, new ErrorPacket((short)1, "File not found"));
         }
@@ -186,10 +186,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         BasePacket bcast = new BroadCastPacket(added, fileName);
         Set<Integer> keySet = connections.getKeys();
 
-        Integer id = currentClientId;
-        keySet.remove(id);
-
-        keySet = keySet.stream().filter(x -> users.get(x)).collect(Collectors.toSet());
+        keySet = keySet.stream().filter(x -> x != currentClientId && users.get(x)).collect(Collectors.toSet());
         for (Integer key : keySet) {
             connections.send(key, bcast);
         }
@@ -211,7 +208,9 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         connections.send(currentClientId, returnPacket);
     }
     public void processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){
+        
         BasePacket returnPacket = new AcknowledgePacket((short)0);
+        System.out.println("SENDING ACK AFTER DISC");
         connections.send(currentClientId, returnPacket);
         users.put(currentClientId, false);
         terminate();
