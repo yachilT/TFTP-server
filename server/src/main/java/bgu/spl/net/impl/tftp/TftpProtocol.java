@@ -185,9 +185,6 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         terminate();
         connections.send(currentClientId, returnPacket);
     }
-    public BasePacket processDeleteRQPacket(DeleteRQPacket deletePacket){
-        return null;
-    }
 
 
 

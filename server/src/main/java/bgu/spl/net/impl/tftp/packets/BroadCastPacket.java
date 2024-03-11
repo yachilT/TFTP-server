@@ -7,15 +7,20 @@ import bgu.spl.net.impl.tftp.OpCode;
 import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class BroadCastPacket extends BasePacket {
-    boolean added;
-    String fileName;
+    private boolean added;
+    private String fileName;
     public BroadCastPacket(){
         super(OpCode.BCAST);
         this.added = false;
         this.fileName = null;
     }
 
-    public BroadCastPacket(boolean added, String fileName)
+    public BroadCastPacket(boolean added, String fileName) {
+        super(OpCode.BCAST);
+        this.added = added;
+        this.fileName = fileName;
+
+    }
     @Override
     public void applyRequest(TftpProtocol protocol){
         protocol.processBcastPacket(this);
