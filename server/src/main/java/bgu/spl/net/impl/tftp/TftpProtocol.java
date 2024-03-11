@@ -7,6 +7,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import bgu.spl.net.api.BidiMessagingProtocol;
 import bgu.spl.net.impl.tftp.packets.*;
@@ -50,29 +52,28 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
     @Override
     public void process(BasePacket message) {
-        BasePacket returnPacket = null;
-        if (sendingData){
+        if (sendingData) {
             if (message.getOpCode() == OpCode.ACK) {
                 try {
-                    returnPacket = dataSender.sendNext((AcknowledgePacket)message);
+                    connections.send(currentClientId, dataSender.sendNext((AcknowledgePacket)message));
                 } catch (IllegalArgumentException e) {
-                    returnPacket = new ErrorPacket((short)0, "Incorrect block number from ACK");
+                    connections.send(currentClientId, new ErrorPacket((short)0, "Incorrect block number from ACK"));
                 } catch (IOException e) {
-                    returnPacket = new ErrorPacket((short)0, "Failed to read data from requested file");
+                    connections.send(currentClientId, new ErrorPacket((short)0, "Failed to read data from requested file"));
                 } catch (NoSuchElementException e) {
                     sendingData = false;
                 }
             }
             else
-                returnPacket = new ErrorPacket((short)0, "Unexpected packet, expected ACK packet");
+                connections.send(currentClientId, new ErrorPacket((short)0, "Unexpected packet, expected ACK packet"));
         }
 
         if (receivingData) {
             if (message.getOpCode() == OpCode.DATA) {
                 try {
-                    returnPacket = dataReceiver.receive((DataPacket)message);
+                    connections.send(currentClientId, dataReceiver.receive((DataPacket)message));
                 } catch (IOException e) {
-                    returnPacket = new ErrorPacket((short)0, "Failed to write data from requested file");
+                    connections.send(currentClientId, new ErrorPacket((short)0, "Failed to write data from requested file"));
                 }
             }
             else {
@@ -170,6 +171,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         Integer id = currentClientId;
         keySet.remove(id);
 
+        keySet.stream().filter(x -> users.get(x)).collect(Collectors.toSet());
         for (Integer key : keySet) {
             connections.send(key, bcast); // needs to check for logged in
         }
@@ -198,7 +200,4 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     public boolean isLoggedIn(){
         return username != null;
     }
-
-
-    
 }
