@@ -87,18 +87,6 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
 
     private short convert2BytesToShort(byte b1, byte b2) {
         return (short) ((short)((b1 & 0xFF) << 8) | (short)(b2 & 0xFF));
-    } 
-
-    private byte[] convertToByteArr() {
-        byte[] arr = new byte[currentBytes.size()];
-        int i = 0;
-        for (byte b : currentBytes) {
-            arr[i] = b;
-        }
-
-        return arr;
     }
-
-
-
+    
 }

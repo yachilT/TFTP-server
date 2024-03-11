@@ -1,37 +1,41 @@
-package bgu.spl.net.impl.tftp.packets;
+package bgu.spl.net.impl.packets;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import bgu.spl.net.impl.tftp.TftpProtocol;
+import bgu.spl.net.impl.packets.OpCode;
 
-public class ReadRQPacket extends BasePacket {
+public class DeleteRQPacket extends BasePacket {
     private String fileName;
-    public ReadRQPacket(){
-        super(OpCode.RRQ);
+
+    public DeleteRQPacket(){
+        super(OpCode.DELRQ);
         this.fileName = null;
     }
-    @Override
-    public void applyRequest(TftpProtocol tftp){
-        if(tftp.isLoggedIn())
-            tftp.processReadRQPacket(this);
-        else   
-            tftp.sendsErrorNotLoggedIn();
+    public DeleteRQPacket(String fileName){
+        super(OpCode.DELRQ);
+        this.fileName = fileName;
     }
 
     public String getFileName() {
         return fileName;
     }
-
+    // @Override
+    // public void applyRequest(TftpProtocol protocol){
+    //     if(protocol.isLoggedIn())
+    //         protocol.processDelPacket(this);
+    //     else
+    //         protocol.sendsErrorNotLoggedIn();
+    // }
     @Override
     public byte[] encodePacket() {
         byte[] result;
         result = convertShortToBytes((short)opcode.ordinal()); // opcode
         try {
-            result = mergeArrays(result, fileName.getBytes("UTF-8")); //file name
+            result = mergeArrays(result, fileName.getBytes("UTF-8")); // file name
         } catch (UnsupportedEncodingException e) {}
         result = mergeArrays(result, ZERO); // 0 byte
-
+        
         return result;
     }
     @Override
@@ -42,8 +46,10 @@ public class ReadRQPacket extends BasePacket {
             return false;
         }
         byte[] byteArr = convertListToByteArr(bytes);
-        bytes.clear();
         fileName = new String(byteArr, StandardCharsets.UTF_8);
+        bytes.clear();
+
         return true;
     }
+    
 }

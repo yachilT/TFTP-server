@@ -3,7 +3,6 @@ package bgu.spl.net.impl.tftp.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-import bgu.spl.net.impl.tftp.OpCode;
 import bgu.spl.net.impl.tftp.TftpProtocol;
 
 public class DeleteRQPacket extends BasePacket {
