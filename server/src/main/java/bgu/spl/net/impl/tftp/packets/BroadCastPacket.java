@@ -23,7 +23,7 @@ public class BroadCastPacket extends BasePacket {
     }
     @Override
     public void applyRequest(TftpProtocol protocol){
-        protocol.processBcastPacket(this);
+       
     }
     
     @Override

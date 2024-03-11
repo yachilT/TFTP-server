@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ import bgu.spl.net.srv.Connections;
 
 public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private Connections<BasePacket> connections;
+    private HashMap<Integer, Boolean> users;
     private int currentClientId;
     private boolean isTerminated;
     private boolean sendingData;
@@ -28,18 +30,19 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private FileReceiver dataReceiver;
     private String username;
 
-    public TftpProtocol(Connections<BasePacket> connections, int currentClientId){
-        this.connections = connections;
-        this.currentClientId = currentClientId;
-        this.isTerminated = false;
-        this.username = null;
-    }
-    public TftpProtocol() {
+    public TftpProtocol(HashMap<Integer, Boolean> users) {
+        this.connections = null;
+        this.currentClientId = -1;
+
         this.sendingData = false;
         this.dataSender = null;
-    
+
         this.receivingData = false;
         this.dataReceiver = null;
+
+        this.username = null;
+        this.isTerminated = false;
+        this.users = users;
     }
     @Override
     public void start(int connectionId, Connections<BasePacket> connections) {
@@ -183,7 +186,12 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         connections.send(currentClientId, returnPacket);
     }
 
-
+    public void sendsErrorNotLoggedIn(){
+        connections.send(currentClientId, new ErrorPacket((short)6, "User not logged in"));
+    }
+    public boolean isLoggedIn(){
+        return username != null;
+    }
 
 
     

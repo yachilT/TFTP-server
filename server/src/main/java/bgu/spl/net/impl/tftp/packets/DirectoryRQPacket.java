@@ -9,7 +9,10 @@ public class DirectoryRQPacket extends BasePacket{
     }
     @Override
     public void applyRequest(TftpProtocol protocol){ 
-        protocol.processDirPacket(this);
+        if(protocol.isLoggedIn())
+            protocol.processDirPacket(this);
+        else
+            protocol.sendsErrorNotLoggedIn();
     }
     @Override
     public byte[] encodePacket() {

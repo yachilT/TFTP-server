@@ -8,7 +8,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.locks.ReentrantLock;
+
 
 public class TftpBlockingConnectionHandler<T> implements Runnable, ConnectionHandler<T> {
 
@@ -18,14 +18,11 @@ public class TftpBlockingConnectionHandler<T> implements Runnable, ConnectionHan
     private BufferedInputStream in;
     private BufferedOutputStream out;
     private volatile boolean connected = true;
-    private final ReentrantLock connectionLock = new ReentrantLock();
-    String username;
 
     public TftpBlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocol<T> protocol) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;
-        this.username = null;
     }
 
     @Override
