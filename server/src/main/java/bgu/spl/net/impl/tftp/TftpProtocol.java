@@ -79,6 +79,8 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
                 try {
                     dataReceiver.close();
                 } catch (IOException e) {}
+
+                broadcast(true, dataReceiver.getfileName());
             }
         }
         message.applyRequest(this);
@@ -169,17 +171,23 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         else {
             connections.send(currentClientId, new AcknowledgePacket((short)0));
 
-            BasePacket bcast = new BroadCastPacket()
-            Set<Integer> keySet = connections.getKeys();
-            Integer id = currentClientId;
-            keySet.remove(id);
-            for (Integer key : keySet) {
-                connections.send(key, )
-            }
         }
         
-        
+        broadcast(false, deleteRQPacket.getFileName());
     }
+
+    private void broadcast(boolean added, String fileName) {
+        BasePacket bcast = new BroadCastPacket(added, fileName);
+        Set<Integer> keySet = connections.getKeys();
+
+        Integer id = currentClientId;
+        keySet.remove(id);
+
+        for (Integer key : keySet) {
+            connections.send(key, bcast); // needs to check for logged in
+        }
+    }
+
     public void processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){
         BasePacket returnPacket = new AcknowledgePacket();
         terminate();

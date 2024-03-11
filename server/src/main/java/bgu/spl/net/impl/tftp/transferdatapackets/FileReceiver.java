@@ -9,15 +9,21 @@ import bgu.spl.net.impl.tftp.packets.AcknowledgePacket;
 import bgu.spl.net.impl.tftp.packets.DataPacket;
 
 public class FileReceiver {
+    private String fileName;
     private File workingFile;
     private FileOutputStream writer;
 
     public FileReceiver(String name) throws IOException {
+        this.fileName = name;
         workingFile = new File(name);
         if (!workingFile.createNewFile())
             throw new FileAlreadyExistsException(name);
             
         writer = new FileOutputStream(workingFile);
+    }
+
+    public String getfileName() {
+        return fileName;
     }
 
     public AcknowledgePacket receive(DataPacket packet) throws IOException {
