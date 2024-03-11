@@ -42,7 +42,8 @@ public class TftpBlockingConnectionHandler<T> implements Runnable, ConnectionHan
                     protocol.process(nextMessage);
                 }
             }
-
+            protocol.disconnect();
+            close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
