@@ -3,6 +3,8 @@ package bgu.spl.net.impl.tftp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import bgu.spl.net.api.*;
@@ -45,12 +47,13 @@ public class TftpServer implements Server<BasePacket>{
 
                 Socket clientSock = serverSock.accept();
                 BidiMessagingProtocol<BasePacket> protocol = protocolFactory.get(); 
-                protocol.start(connectionsCounter++, connections);
+                protocol.start(connectionsCounter, connections);
                 TftpBlockingConnectionHandler<BasePacket> handler = new TftpBlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
-                        protocolFactory.get());
+                        protocol);
                 execute(handler);
+                connections.connect(connectionsCounter++, handler);
             }
         } catch (IOException ex) {
         }
@@ -65,5 +68,14 @@ public class TftpServer implements Server<BasePacket>{
     }
     protected void execute(TftpBlockingConnectionHandler<BasePacket>  handler){
             new Thread(handler).start();
+    }
+
+    public static void main(String[] args) {
+        Map<Integer, Boolean> users = new HashMap<>();
+        Server<BasePacket> server = new TftpServer(7777, () -> new TftpProtocol(users), () -> new TftpEncoderDecoder());
+        server.serve();
+        try {
+            server.close();
+        } catch (IOException e) {}
     }
 }

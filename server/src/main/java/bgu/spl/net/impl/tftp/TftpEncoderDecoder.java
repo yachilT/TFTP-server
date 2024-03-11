@@ -22,6 +22,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
         currentBytes.add(nextByte);
         if (currentBytes.size() == 2) {
             short incomingOpCode = convert2BytesToShort(currentBytes.get(0), currentBytes.get(1));
+            System.out.println("incoming opcode: " + incomingOpCode);
             if (incomingOpCode == OpCode.RRQ.ordinal()) {
                 packet = new ReadRQPacket();
                 return null;
@@ -68,9 +69,13 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
                 packet = new BroadCastPacket();
                 return null;
             }
+            return null;
         } 
-        if(packet.decodeNextByte(nextByte))
-            return packet;
+        else if(packet != null && packet.decodeNextByte(nextByte)) {
+            BasePacket finishedPacket = packet;
+            packet = null;
+            return finishedPacket;
+        }
         else
             return null;
     }

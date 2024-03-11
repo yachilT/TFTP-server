@@ -4,10 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import bgu.spl.net.api.BidiMessagingProtocol;
@@ -20,7 +19,7 @@ import bgu.spl.net.srv.Connections;
 
 public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private Connections<BasePacket> connections;
-    private HashMap<Integer, Boolean> users;
+    private Map<Integer, Boolean> users;
     private int currentClientId;
     private boolean isTerminated;
     private boolean sendingData;
@@ -30,7 +29,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private FileReceiver dataReceiver;
     private String username;
 
-    public TftpProtocol(HashMap<Integer, Boolean> users) {
+    public TftpProtocol(Map<Integer, Boolean> users) {
         this.connections = null;
         this.currentClientId = -1;
 
@@ -47,8 +46,10 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     @Override
     public void start(int connectionId, Connections<BasePacket> connections) {
         this.currentClientId = connectionId;
+        System.out.println("given connectionId: " + this.currentClientId);
         this.connections = connections;
         this.users.put(currentClientId, false);
+        System.out.println("protocol started");
     }
 
     @Override
@@ -196,14 +197,17 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
     public void processLoginRQPacket(LoginRQPacket loginPacket){
         BasePacket returnPacket;
+        System.out.println(users.entrySet());
+        System.out.println("currentId: " + currentClientId);
+        System.out.println(this.users.get(currentClientId));
         if(users.get(currentClientId))
             returnPacket = new ErrorPacket((short)7, "User already logged in");
         else {
             username = loginPacket.getUsername();
             users.put(currentClientId, true);
             returnPacket = new AcknowledgePacket((short)0);
+            System.out.println("BUILT ACK");
         }
-
         connections.send(currentClientId, returnPacket);
     }
     public void processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){

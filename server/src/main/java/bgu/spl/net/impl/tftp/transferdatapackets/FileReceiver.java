@@ -16,7 +16,7 @@ public class FileReceiver {
 
     public FileReceiver(String name) throws IOException {
         this.fileName = name;
-        workingFile = new File(FILES_PATH+ "\\" + name);
+        workingFile = new File(FILES_PATH + "\\" + name);
         if (!workingFile.createNewFile())
             throw new FileAlreadyExistsException(name);
             
