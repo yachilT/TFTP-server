@@ -12,10 +12,11 @@ public class FileReceiver {
     private String fileName;
     private File workingFile;
     private FileOutputStream writer;
+    private final String FILES_PATH = "Flies";
 
     public FileReceiver(String name) throws IOException {
         this.fileName = name;
-        workingFile = new File(name);
+        workingFile = new File(FILES_PATH+ "\\" + name);
         if (!workingFile.createNewFile())
             throw new FileAlreadyExistsException(name);
             
@@ -34,7 +35,7 @@ public class FileReceiver {
     }
 
     public void error() throws IOException {
-        writer.close();
+        close();
         workingFile.delete();
     }
 

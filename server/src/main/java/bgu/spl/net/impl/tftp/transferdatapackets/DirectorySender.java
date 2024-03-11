@@ -29,10 +29,11 @@ public class DirectorySender extends DataSender {
             }
             bytes.add((byte)0);
         }
+        bytes.remove(bytes.size() - 1);
     }
 
     @Override
-    protected DataPacket getNextPacket(short blockNumber) throws IOException, NoSuchElementException {
+    protected DataPacket loadNextPacket(short blockNumber) throws IOException, NoSuchElementException {
         if (bytes.isEmpty())
             throw new NoSuchElementException();
         byte[] dataToSend = new byte[Math.min(bytes.size(), DataPacket.MAX_DATA_SIZE)];

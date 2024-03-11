@@ -13,7 +13,7 @@ public class AcknowledgePacket extends BasePacket {
         this.blockNumber = -1;
     }
     public AcknowledgePacket(short blockNumber){
-        super(OpCode.ACK, (short)-1);
+        super(OpCode.ACK);
         this.blockNumber = blockNumber;
     }
     @Override

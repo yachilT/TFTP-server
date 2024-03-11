@@ -9,14 +9,15 @@ import bgu.spl.net.impl.tftp.packets.DataPacket;
 
 public class FileSender extends DataSender {
     private FileInputStream reader;
+    private final String FILES_PATH = "Flies";
 
     public FileSender(String name) throws FileNotFoundException {
-        this.reader = new FileInputStream(name);
+        this.reader = new FileInputStream(FILES_PATH + "\\" + name);
         lastDataPacket = null;
     }
 
     @Override
-    protected DataPacket getNextPacket(short blockNumber) throws IOException, NoSuchElementException {
+    protected DataPacket loadNextPacket(short blockNumber) throws IOException, NoSuchElementException {
         if (reader.available() == 0) {
             throw new NoSuchElementException();
         }

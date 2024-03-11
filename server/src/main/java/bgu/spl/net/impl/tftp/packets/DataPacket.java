@@ -20,7 +20,7 @@ public class DataPacket extends BasePacket {
         super(OpCode.DATA, (short)-1);
         this.size = -1;
         this.blockNumber = -1;
-        this.data = null;
+        this.data = new byte[0];
     }
 
     @Override
@@ -57,7 +57,7 @@ public class DataPacket extends BasePacket {
         if(length == 6){
             blockNumber = convert2BytesToShort(bytes.get(0), bytes.get(1));
             bytes.clear();
-            return false;
+            return size == 0;
         }
         if(bytes.size() == size){
             data = convertListToByteArr(bytes);
@@ -66,6 +66,9 @@ public class DataPacket extends BasePacket {
         }
 
         return false;
+    }
+    public short getSize(){
+        return size;
     }
     
 }

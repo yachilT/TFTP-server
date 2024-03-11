@@ -13,19 +13,29 @@ public abstract class DataSender {
         lastDataPacket = null;
     }
 
-    protected abstract DataPacket getNextPacket(short blockNumber) throws IOException, NoSuchElementException;
+    protected abstract DataPacket loadNextPacket(short blockNumber) throws IOException, NoSuchElementException;
 
-    public DataPacket sendFirst() throws IOException { // definde what to do if there isnt data on first try
-        lastDataPacket = getNextPacket((short)0);
+    public DataPacket sendFirst() throws IOException, NoSuchElementException { // definde what to do if there isnt data on first try
+        lastDataPacket = loadNextPacket((short)1);
         return lastDataPacket;
     }
 
     public DataPacket sendNext(AcknowledgePacket ACKPacket) throws IOException, IllegalArgumentException, NoSuchElementException {
         if (ACKPacket.getBlockNumber() != lastDataPacket.getBlockNumber()) {
-            throw new IllegalArgumentException("Incorrect ACKPacket");
+            throw new IllegalArgumentException("Incorrect ACK Packet");
         }
-        lastDataPacket = getNextPacket((short)(lastDataPacket.getBlockNumber() + 1));
-        return lastDataPacket;
+        try{
+            lastDataPacket = loadNextPacket((short)(lastDataPacket.getBlockNumber() + 1));
+        }
+        catch(NoSuchElementException e){
+            if(lastDataPacket.getSize() < DataPacket.MAX_DATA_SIZE)
+                throw e;
+            else{    
+                lastDataPacket = new DataPacket((short)(lastDataPacket.getBlockNumber() + 1), new byte[0]);
+            }
+
+        }
+            return lastDataPacket;
     }
 
     public abstract void error() throws IOException;
