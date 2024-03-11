@@ -19,65 +19,75 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
 
     @Override
     public BasePacket decodeNextByte(byte nextByte) {
-        currentBytes.add(nextByte);
-        if (currentBytes.size() == 2) {
-            short incomingOpCode = convert2BytesToShort(currentBytes.get(0), currentBytes.get(1));
-            System.out.println("incoming opcode: " + incomingOpCode);
-            if (incomingOpCode == OpCode.RRQ.ordinal()) {
-                packet = new ReadRQPacket();
+        if (packet == null) {
+            currentBytes.add(nextByte);
+            if (currentBytes.size() == 2) {
+                short incomingOpCode = convert2BytesToShort(currentBytes.get(0), currentBytes.get(1));
+                System.out.println("incoming opcode: " + incomingOpCode);
+                if (incomingOpCode == OpCode.RRQ.ordinal()) {
+                    packet = new ReadRQPacket();
+                    return null;
+                }
+
+                if (incomingOpCode == OpCode.WRQ.ordinal()) {
+                    packet = new WriteRQPacket();
+                    return null;
+                }
+
+                if (incomingOpCode == OpCode.DATA.ordinal()) {
+                    packet = new DataPacket();
+                    return null;
+                }
+
+                if (incomingOpCode == OpCode.ACK.ordinal()) {
+                    packet = new AcknowledgePacket();
+                    return null;
+                }
+
+                if (incomingOpCode == OpCode.ERROR.ordinal()) {
+                    packet = new ErrorPacket();
+                    return null;
+                }
+
+                if (incomingOpCode == OpCode.DIRQ.ordinal()) {
+                    packet = null;
+                    currentBytes.clear();
+                    return new DirectoryRQPacket();
+                }
+                if(incomingOpCode == OpCode.DISC.ordinal()){
+                    packet = null;
+                    currentBytes.clear();
+                    return new DisconnectRQPacket();
+                }
+
+                if (incomingOpCode == OpCode.LOGRQ.ordinal()) {
+                    packet = new LoginRQPacket();
+                    return null;
+                }
+
+                if (incomingOpCode == OpCode.DELRQ.ordinal()) {
+                    packet = new DeleteRQPacket();
+                    return null;
+                }
+
+                if (incomingOpCode == OpCode.BCAST.ordinal()) {
+                    packet = new BroadCastPacket();
+                    return null;
+                }
                 return null;
             }
-
-            if (incomingOpCode == OpCode.WRQ.ordinal()) {
-                packet = new WriteRQPacket();
-                return null;
-            }
-
-            if (incomingOpCode == OpCode.DATA.ordinal()) {
-                packet = new DataPacket();
-                return null;
-            }
-
-            if (incomingOpCode == OpCode.ACK.ordinal()) {
-                packet = new AcknowledgePacket();
-                return null;
-            }
-
-            if (incomingOpCode == OpCode.ERROR.ordinal()) {
-                packet = new ErrorPacket();
-                return null;
-            }
-
-            if (incomingOpCode == OpCode.DIRQ.ordinal()) {
-                return new DirectoryRQPacket();
-            }
-            if(incomingOpCode == OpCode.DISC.ordinal()){
-                return new DisconnectRQPacket();
-            }
-
-            if (incomingOpCode == OpCode.LOGRQ.ordinal()) {
-                packet = new LoginRQPacket();
-                return null;
-            }
-
-            if (incomingOpCode == OpCode.DELRQ.ordinal()) {
-                packet = new DeleteRQPacket();
-                return null;
-            }
-
-            if (incomingOpCode == OpCode.BCAST.ordinal()) {
-                packet = new BroadCastPacket();
-                return null;
-            }
-            return null;
-        } 
-        else if(packet != null && packet.decodeNextByte(nextByte)) {
-            BasePacket finishedPacket = packet;
-            packet = null;
-            return finishedPacket;
+            return null; 
         }
-        else
+        else {
+            if(packet.decodeNextByte(nextByte)) {
+                BasePacket finishedPacket = packet;
+                packet = null;
+                currentBytes.clear();
+                return finishedPacket;
+            }
             return null;
+        }
+    
     }
 
     @Override
@@ -89,15 +99,6 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
         return (short) ((short)((b1 & 0xFF) << 8) | (short)(b2 & 0xFF));
     } 
 
-    private byte[] convertToByteArr() {
-        byte[] arr = new byte[currentBytes.size()];
-        int i = 0;
-        for (byte b : currentBytes) {
-            arr[i] = b;
-        }
-
-        return arr;
-    }
 
 
 

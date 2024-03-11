@@ -1,6 +1,5 @@
 package bgu.spl.net.srv;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -15,7 +14,7 @@ public class ConnectionsImpl<T> implements Connections <T > {
     @Override
     public boolean send(int connectionId, T msg) {
         if(connections.containsKey(connectionId)){
-            System.out.println("SENDING MESSEGE");
+            System.out.println("SENDING MESSEGE " + msg);
             connections.get(connectionId).send(msg);
             return true;
         }
