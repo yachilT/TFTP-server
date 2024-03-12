@@ -32,4 +32,7 @@ public class FileManager {
     public void removeFile(String name) {
         availableFiles.remove(name);
     }
+    public String getPath(){
+        return workingDirectory;
+    }
 }

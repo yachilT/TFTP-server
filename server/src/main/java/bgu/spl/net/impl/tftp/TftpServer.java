@@ -1,5 +1,6 @@
 package bgu.spl.net.impl.tftp;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,6 +10,7 @@ import java.util.function.Supplier;
 
 import bgu.spl.net.api.*;
 import bgu.spl.net.impl.tftp.packets.BasePacket;
+import bgu.spl.net.impl.tftp.transferdatapackets.FileManager;
 import bgu.spl.net.srv.Connections;
 import bgu.spl.net.srv.ConnectionsImpl;
 import bgu.spl.net.srv.Server;
@@ -72,7 +74,14 @@ public class TftpServer implements Server<BasePacket>{
 
     public static void main(String[] args) {
         Map<Integer, Boolean> users = new HashMap<>();
-        Server<BasePacket> server = new TftpServer(7777, () -> new TftpProtocol(users), () -> new TftpEncoderDecoder());
+        FileManager fileManager;
+        try {
+            fileManager = new FileManager();
+        } catch (FileNotFoundException e) {
+            System.out.println("files directory not found");
+            return;
+        }
+        Server<BasePacket> server = new TftpServer(7777, () -> new TftpProtocol(users, fileManager), () -> new TftpEncoderDecoder());
         server.serve();
         try {
             server.close();

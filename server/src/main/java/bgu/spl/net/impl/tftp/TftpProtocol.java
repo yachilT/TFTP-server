@@ -13,6 +13,7 @@ import bgu.spl.net.api.BidiMessagingProtocol;
 import bgu.spl.net.impl.tftp.packets.*;
 import bgu.spl.net.impl.tftp.transferdatapackets.DataSender;
 import bgu.spl.net.impl.tftp.transferdatapackets.DirectorySender;
+import bgu.spl.net.impl.tftp.transferdatapackets.FileManager;
 import bgu.spl.net.impl.tftp.transferdatapackets.FileReceiver;
 import bgu.spl.net.impl.tftp.transferdatapackets.FileSender;
 import bgu.spl.net.srv.Connections;
@@ -24,12 +25,13 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private boolean isTerminated;
     private boolean sendingData;
     private DataSender dataSender;
+    private FileManager fileManager;
 
     private boolean receivingData;
     private FileReceiver dataReceiver;
     private String username;
 
-    public TftpProtocol(Map<Integer, Boolean> users) {
+    public TftpProtocol(Map<Integer, Boolean> users, FileManager fileManager) {
         this.connections = null;
         this.currentClientId = -1;
 
@@ -42,6 +44,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         this.username = null;
         this.isTerminated = false;
         this.users = users;
+        this.fileManager = fileManager;
     }
     @Override
     public void start(int connectionId, Connections<BasePacket> connections) {
@@ -97,6 +100,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
                 receivingData = false;
                 try {
                     dataReceiver.close();
+                    fileManager.addFile(dataReceiver.getfileName());
                 } catch (IOException e) {}
 
                 broadcast(true, dataReceiver.getfileName());
@@ -121,7 +125,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     
     public void processReadRQPacket(ReadRQPacket readPacket){
         try {
-            dataSender = new FileSender(readPacket.getFileName());
+            dataSender = new FileSender(readPacket.getFileName(), fileManager);
             sendingData = true;
             connections.send(currentClientId, new AcknowledgePacket((short)0));
             connections.send(currentClientId, dataSender.sendFirst());
@@ -156,7 +160,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     public void processWriteRQPacket(WriteRQPacket writePacket) {
         BasePacket returnPacket;
         try {
-            dataReceiver = new FileReceiver(writePacket.getFileName());
+            dataReceiver = new FileReceiver(writePacket.getFileName(), fileManager);
             receivingData = true;
             returnPacket = new AcknowledgePacket((short)0);
         } catch (FileAlreadyExistsException e) {
@@ -169,16 +173,19 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     }
 
     public void processDelPacket(DeleteRQPacket deleteRQPacket) {
-        File file = new File("server/Flies/" + deleteRQPacket.getFileName());
-        if (!file.exists()) {
+        File file;
+        try {
+            file = fileManager.getFile(deleteRQPacket.getFileName());
+            if (!file.delete()) {
+                connections.send(currentClientId, new ErrorPacket((short)2, "File cannot be deleted"));
+            }
+            else {
+                fileManager.removeFile(deleteRQPacket.getFileName());
+                connections.send(currentClientId, new AcknowledgePacket((short)0));
+                broadcast(false, deleteRQPacket.getFileName());
+            }
+        } catch (FileNotFoundException e) {
             connections.send(currentClientId, new ErrorPacket((short)1, "File not found"));
-        }
-        else if (!file.delete()) {
-            connections.send(currentClientId, new ErrorPacket((short)2, "File cannot be deleted"));
-        }
-        else {
-            connections.send(currentClientId, new AcknowledgePacket((short)0));
-            broadcast(false, deleteRQPacket.getFileName());
         }
     }
 

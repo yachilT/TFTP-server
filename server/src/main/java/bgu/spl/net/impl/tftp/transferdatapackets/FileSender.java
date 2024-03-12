@@ -1,5 +1,6 @@
 package bgu.spl.net.impl.tftp.transferdatapackets;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,10 +10,9 @@ import bgu.spl.net.impl.tftp.packets.DataPacket;
 
 public class FileSender extends DataSender {
     private FileInputStream reader;
-    private final String FILES_PATH = "server/Flies";
 
-    public FileSender(String name) throws FileNotFoundException {
-        this.reader = new FileInputStream(FILES_PATH + "/" + name);
+    public FileSender(String name, FileManager fileManager) throws FileNotFoundException {
+        this.reader = new FileInputStream(fileManager.getFile(name));
         System.out.println("Found " + name);
         lastDataPacket = null;
     }

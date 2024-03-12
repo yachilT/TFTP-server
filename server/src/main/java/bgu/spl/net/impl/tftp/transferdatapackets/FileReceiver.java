@@ -14,11 +14,13 @@ public class FileReceiver {
     private String fileName;
     private File workingFile;
     private FileOutputStream writer;
+    private FileManager fileManager;
     private final String FILES_PATH = "server/Flies";
 
-    public FileReceiver(String name) throws IOException {
+    public FileReceiver(String name, FileManager fileManager) throws IOException {
+        this.fileManager = fileManager;
         this.fileName = name;
-        workingFile = new File(FILES_PATH + "/" + name);
+        workingFile = new File(fileManager.getPath() + "/" + name);
         if (!workingFile.createNewFile())
             throw new FileAlreadyExistsException(name);
             
