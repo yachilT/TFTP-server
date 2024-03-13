@@ -15,7 +15,6 @@ public class FileReceiver {
     private File workingFile;
     private FileOutputStream writer;
     private FileManager fileManager;
-    private final String FILES_PATH = "server/Flies";
 
     public FileReceiver(String name, FileManager fileManager) throws IOException {
         this.fileManager = fileManager;

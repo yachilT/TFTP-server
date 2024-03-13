@@ -20,7 +20,7 @@ import bgu.spl.net.srv.Connections;
 
 public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     private Connections<BasePacket> connections;
-    private Map<Integer, Boolean> users;
+    private Map<Integer, String> users;
     private int currentClientId;
     private boolean isTerminated;
     private boolean sendingData;
@@ -29,9 +29,8 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
     private boolean receivingData;
     private FileReceiver dataReceiver;
-    private String username;
 
-    public TftpProtocol(Map<Integer, Boolean> users, FileManager fileManager) {
+    public TftpProtocol(Map<Integer, String> users, FileManager fileManager) {
         this.connections = null;
         this.currentClientId = -1;
 
@@ -41,7 +40,6 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         this.receivingData = false;
         this.dataReceiver = null;
 
-        this.username = null;
         this.isTerminated = false;
         this.users = users;
         this.fileManager = fileManager;
@@ -51,7 +49,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         this.currentClientId = connectionId;
         System.out.println("given connectionId: " + this.currentClientId);
         this.connections = connections;
-        this.users.put(currentClientId, false);
+        this.users.put(currentClientId, "");
         System.out.println("protocol started");
     }
 
@@ -141,7 +139,7 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     public void processDirPacket(DirectoryRQPacket dirPacket){
         BasePacket returnPacket;
         try {
-            dataSender = new DirectorySender();
+            dataSender = new DirectorySender(fileManager);
             sendingData = true;
             connections.send(currentClientId, new AcknowledgePacket((short)0));
             returnPacket = dataSender.sendFirst();
@@ -193,10 +191,14 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         BasePacket bcast = new BroadCastPacket(added, fileName);
         Set<Integer> keySet = connections.getKeys();
 
-        keySet = keySet.stream().filter(x -> x != currentClientId && users.get(x)).collect(Collectors.toSet());
+        keySet = keySet.stream().filter(x -> x != currentClientId && isLoggedIn()).collect(Collectors.toSet());
         for (Integer key : keySet) {
             connections.send(key, bcast);
         }
+    }
+
+    public boolean isLoggedIn() {
+        return !users.get(currentClientId).equals("");
     }
 
     public void processLoginRQPacket(LoginRQPacket loginPacket){
@@ -204,13 +206,20 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         System.out.println(users.entrySet());
         System.out.println("currentId: " + currentClientId);
         System.out.println(this.users.get(currentClientId));
-        if(users.get(currentClientId))
+
+        if(isLoggedIn())
             returnPacket = new ErrorPacket((short)7, "User already logged in");
         else {
-            username = loginPacket.getUsername();
-            users.put(currentClientId, true);
-            returnPacket = new AcknowledgePacket((short)0);
-            System.out.println("BUILT ACK");
+            String username = loginPacket.getUsername();
+            System.out.println("name in user? " + users.values().contains(username));
+            if (!users.values().contains(username)) {
+                users.put(currentClientId, username);
+                returnPacket = new AcknowledgePacket((short)0);
+                System.out.println("BUILT ACK");
+            }
+            else {
+                returnPacket = new ErrorPacket((short)0, "username is not available");
+            }
         }
         connections.send(currentClientId, returnPacket);
     }
@@ -219,14 +228,11 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         BasePacket returnPacket = new AcknowledgePacket((short)0);
         System.out.println("SENDING ACK AFTER DISC");
         connections.send(currentClientId, returnPacket);
-        users.put(currentClientId, false);
+        users.put(currentClientId, null);
         terminate();
     }
 
     public void sendsErrorNotLoggedIn(){
         connections.send(currentClientId, new ErrorPacket((short)6, "User not logged in"));
-    }
-    public boolean isLoggedIn(){
-        return username != null;
     }
 }

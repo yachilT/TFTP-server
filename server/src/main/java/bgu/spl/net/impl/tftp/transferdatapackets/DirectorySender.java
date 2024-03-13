@@ -13,12 +13,11 @@ import bgu.spl.net.impl.tftp.packets.DataPacket;
 public class DirectorySender extends DataSender {
 
     List<Byte> bytes;
-    private static final String FILES_PATH = "server/Flies";
     
 
-    public DirectorySender() throws FileNotFoundException {
-        File dirPath = new File (FILES_PATH);
-
+    public DirectorySender(FileManager manager) throws FileNotFoundException {
+        File dirPath = new File (manager.getPath());
+        
         if (!dirPath.exists()) {
             throw new FileNotFoundException();
         }

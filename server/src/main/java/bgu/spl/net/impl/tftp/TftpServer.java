@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import bgu.spl.net.api.*;
@@ -73,7 +74,7 @@ public class TftpServer implements Server<BasePacket>{
     }
 
     public static void main(String[] args) {
-        Map<Integer, Boolean> users = new HashMap<>();
+        Map<Integer, String> users = new ConcurrentHashMap<>();
         FileManager fileManager;
         try {
             fileManager = new FileManager();
