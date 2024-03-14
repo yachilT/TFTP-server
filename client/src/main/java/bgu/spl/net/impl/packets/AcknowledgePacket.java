@@ -17,7 +17,7 @@ public class AcknowledgePacket extends BasePacket {
     @Override
     public BasePacket applyRequest(TftpMessagingProtocol protocol){
         System.out.println("ACK " + blockNumber);
-        return null;
+        return protocol.handleAckPacket(this);
     }
     
     @Override

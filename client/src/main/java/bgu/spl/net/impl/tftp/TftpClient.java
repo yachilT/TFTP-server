@@ -97,29 +97,35 @@ public class TftpClient {
     }
 
     public BasePacket handleDISC(){
-        lastRequest.setOpcode(OpCode.DISC);
-       return new DisconnectRQPacket();
+        DisconnectRQPacket packet = new DisconnectRQPacket();
+        lastRequest.setRequest(packet);
+       return packet;
         
     }
     public BasePacket handleDIRQ(){
-        lastRequest.setOpcode(OpCode.DIRQ);
-        return new DirectoryRQPacket();
+        DirectoryRQPacket packet = new DirectoryRQPacket();
+        lastRequest.setRequest(packet);
+        return packet;
     }
     public BasePacket handleLOGRQ(String username){
-        lastRequest.setOpcode(OpCode.LOGRQ);
-        return new LoginRQPacket(username);
+        LoginRQPacket packet = new LoginRQPacket(username);
+        lastRequest.setRequest(packet);
+        return packet;
     }
     public BasePacket handleDELRQ(String filename){
-        lastRequest.setOpcode(OpCode.DELRQ);
-        return new DeleteRQPacket(filename);
+        DeleteRQPacket packet = new DeleteRQPacket();     
+        lastRequest.setRequest(packet);
+        return packet;
     }
     public BasePacket handleRRQ(String filename){
-        lastRequest.setOpcode(OpCode.RRQ);
-        return new ReadRQPacket(filename);
+        ReadRQPacket packet = new ReadRQPacket(filename);
+        lastRequest.setRequest(packet);
+        return packet;
     }
     public BasePacket handleWRQ(String filename){
-        lastRequest.setOpcode(OpCode.WRQ);
-        return new WriteRQPacket(filename);
+        WriteRQPacket packet = new WriteRQPacket(filename);
+        lastRequest.setRequest(packet);
+        return packet;
     }
     //TODO: implement the main logic of the client, when using a thread per client the main logic goes here
     public static void main(String[] args) {

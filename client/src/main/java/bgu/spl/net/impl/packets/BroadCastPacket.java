@@ -23,8 +23,7 @@ public class BroadCastPacket extends BasePacket {
     }
     @Override
     public BasePacket applyRequest(TftpMessagingProtocol protocol){
-       System.out.println("BCAST " + (added ? "add ":"del ") + fileName);
-       return null;
+        return protocol.handleBCASTPacket(this);
     }
     
     @Override
@@ -58,5 +57,8 @@ public class BroadCastPacket extends BasePacket {
         }
         
         return false;
+    }
+    public String toString() {
+        return "BCAST " + (added ? "add ":"del ") + fileName;
     }
 }

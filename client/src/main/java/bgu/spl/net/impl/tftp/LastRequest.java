@@ -1,11 +1,9 @@
 package bgu.spl.net.impl.tftp;
 
-import bgu.spl.net.impl.packets.BasePacket;
-import bgu.spl.net.impl.packets.OpCode;
-import bgu.spl.net.impl.packets.ReadRQPacket;
-import bgu.spl.net.impl.tftp.transferdatapackets.DataReceiver;
-import bgu.spl.net.impl.tftp.transferdatapackets.DataSender;
-import bgu.spl.net.impl.tftp.transferdatapackets.FileReceiver;
+import java.io.IOException;
+
+import bgu.spl.net.impl.packets.*;
+import bgu.spl.net.impl.tftp.transferdatapackets.*;
 
 public class LastRequest {
     private OpCode requestOpCode;
@@ -14,15 +12,45 @@ public class LastRequest {
 
     public void LastRequest() {
         requestOpCode = OpCode.UNDEFINED;
+        this.dataReciever = null;
+        this.dataSender = null;
     }
 
-    public synchronized void setOpcode(BasePacket packet) {
+    public synchronized void setRequest(BasePacket packet) {
         this.requestOpCode = packet.getOpCode();
     }
     
-    public synchronized void setOpcode(ReadRQPacket packet) {
+    public synchronized void setRequest(ReadRQPacket packet) {
+        this.requestOpCode = packet.getOpCode();
+        dataReciever = new FileReceiver(packet.getFileName());
     }
-
+    public synchronized void setRequest(WriteRQPacket packet){
+        this.requestOpCode = packet.getOpCode();
+        dataSender = new FileSender(packet.getFileName());
+    }
+    public synchronized void setRequest(DirectoryRQPacket packet){
+        this.requestOpCode = packet.getOpCode();
+        dataReciever = new DirectoryReciever();
+    }
+    private void reset() {
+        this.requestOpCode = OpCode.UNDEFINED;
+        dataReciever = null;
+        dataSender = null;
+    }
+    public void close() throws IOException {
+        if(dataReciever != null)
+            dataReciever.close();
+        if(dataSender != null)
+            dataSender.close();
+        reset();
+    }
+    public void error() throws IOException {
+        if(dataReciever != null)
+            dataReciever.error();
+        if(dataSender != null)
+            dataSender.error();
+        reset();
+    }
     public synchronized OpCode getOpCode() {
         return requestOpCode;
     }
@@ -34,5 +62,5 @@ public class LastRequest {
     public synchronized DataSender getDataSender() {
         return dataSender;
     }
-
+    
 }

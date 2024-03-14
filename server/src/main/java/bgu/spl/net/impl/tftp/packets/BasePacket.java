@@ -28,6 +28,7 @@ public abstract class BasePacket {
     public abstract byte[] encodePacket();
     public abstract boolean decodeNextByte(byte nextByte);
 
+
     public OpCode getOpCode()
     {
         return opcode;

@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.impl.packets.AcknowledgePacket;
 import bgu.spl.net.impl.packets.BasePacket;
+import bgu.spl.net.impl.packets.BroadCastPacket;
 import bgu.spl.net.impl.packets.DataPacket;
 import bgu.spl.net.impl.packets.ErrorPacket;
 import bgu.spl.net.impl.packets.OpCode;
@@ -14,18 +15,11 @@ import bgu.spl.net .impl.tftp.transferdatapackets.FileManager;
 import bgu.spl.net.impl.tftp.transferdatapackets.FileReceiver;
 
 public class TftpMessagingProtocol implements MessagingProtocol<BasePacket>{
-    private boolean receivingData;
-    private FileReceiver dataReceiver;
-
-    private boolean sendingData;
-    private DataSender dataSender;
-
-    private final FileManager fileManager;
+ 
     private boolean terminate;
     private final KeyboardLocker locker;
     private final LastRequest lastRequest;
-    public TftpMessagingProtocol(FileManager fileManger, KeyboardLocker locker, LastRequest lastRequest) {
-        this.fileManager = fileManger;
+    public TftpMessagingProtocol(KeyboardLocker locker, LastRequest lastRequest) {
         this.locker = locker;
         this.lastRequest = lastRequest;
     }
@@ -45,52 +39,53 @@ public class TftpMessagingProtocol implements MessagingProtocol<BasePacket>{
 
         BasePacket packetToSend = null;
         try {
-            packetToSend = dataReceiver.receive(message);
+            packetToSend = lastRequest.getDataReceiver().receive(message);
 
-            if (((DataPacket)message).getSize() < DataPacket.MAX_DATA_SIZE) {
-                receivingData = false;
+            if (message.getSize() < DataPacket.MAX_DATA_SIZE) {
+                lastRequest.close();
                 locker.notFutureNotify();
-                
-                try { 
-                    dataReceiver.close(); 
-                    fileManager.addFile(dataReceiver.getfileName());
-                } catch (IOException e1) {}
             }
 
-        } catch (IOException e) {
+        } catch (Exception e /* IOExecption e */) {
             packetToSend = new ErrorPacket((short)2, "Access Violation - File cannot be written");
-            receivingData = false;
             try {
-                dataReceiver.error();
+                lastRequest.error();
             } catch (IOException e1) {}
             
         }
         
         return packetToSend;
     }
-
-    private BasePacket handleSendingData(BasePacket message) {
-        if (message.getOpCode() == OpCode.ACK) {
+    public BasePacket handleAckPacket(AcknowledgePacket message) {
+        System.out.println(message);
+        if (lastRequest.getOpCode() == OpCode.WRQ){ 
             try {
-                 return dataSender.sendNext((AcknowledgePacket)message);
+                return lastRequest.getDataSender().sendNext(message);
             } catch (IllegalArgumentException e) {
-                sendingData = false;
-                try {
-                    dataSender.error();
-                } catch (IOException e1) {}
+                try { lastRequest.error(); } catch (IOException e1) {}
                 return new ErrorPacket((short)0, "Incorrect block number from ACK");
+
             } catch (IOException e) {
                 return new ErrorPacket((short)2, "Access violation - File cannot be read");
             } catch (NoSuchElementException e) {
-                sendingData = false;
+                try { lastRequest.close(); } catch (IOException e1) {}
                 return null;
             }
         }
         else
             return new ErrorPacket((short)0, "Unexpected packet, expected ACK packet");
+         
+    }
+    public BasePacket handleBCASTPacket(BroadCastPacket packet){
+        System.out.println(packet.toString());
+        return null;
     }
 
-    public BasePacket handleAckPacket(AcknowledgePacket packet) {
-        if (ackAfterWRQ) 
+    public BasePacket handleErrorPacket(ErrorPacket packet) {
+        System.out.println(packet.toString());
+        try {
+            lastRequest.error();
+        } catch (IOException e) {}
+        return null;
     }
 }

@@ -23,8 +23,7 @@ public class ErrorPacket extends BasePacket {
 
     @Override
     public BasePacket applyRequest(TftpMessagingProtocol protocol){
-        System.out.println("Error " + errorCode + " " + errMsg);
-        return null;
+        return protocol.handleErrorPacket(this);
     }
     
     @Override
@@ -57,6 +56,9 @@ public class ErrorPacket extends BasePacket {
             return true;
         }
         return false;
+    }
+    public String toString() {
+        return "Error " + errorCode + " " + errMsg;
     }
     
 }
