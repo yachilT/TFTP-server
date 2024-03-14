@@ -14,7 +14,6 @@ public class ConnectionsImpl<T> implements Connections <T > {
     @Override
     public boolean send(int connectionId, T msg) {
         if(connections.containsKey(connectionId)){
-            System.out.println("SENDING MESSEGE " + msg);
             connections.get(connectionId).send(msg);
             return true;
         }

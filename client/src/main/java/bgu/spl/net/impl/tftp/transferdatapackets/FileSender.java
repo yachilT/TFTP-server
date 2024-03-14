@@ -11,7 +11,6 @@ public class FileSender extends DataSender {
 
     public FileSender(String name) throws FileNotFoundException {
         this.reader = new FileInputStream(name);
-        System.out.println("Found " + name);
         lastDataPacket = null;
     }
 

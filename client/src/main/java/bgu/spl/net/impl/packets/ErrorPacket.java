@@ -40,25 +40,26 @@ public class ErrorPacket extends BasePacket {
     }
     @Override
     public boolean decodeNextByte(byte nextByte){
-        if(nextByte != 0){
-            bytes.add(nextByte);
-            length++;
+        bytes.add(nextByte);
+        if(errorCode == -1) {
+            if (bytes.size() == 2) {
+                errorCode = convert2BytesToShort(bytes.get(0), bytes.get(1));
+                bytes.clear();
+            }
         }
-        if(length == 4){
-            errorCode = convert2BytesToShort(bytes.get(0), bytes.get(1));
-            bytes.clear();
-            return false;
-        }
-        
-        if(nextByte == 0){
+        else if(nextByte == 0){
             errMsg = new String(convertListToByteArr(bytes), StandardCharsets.UTF_8);
             bytes.clear();
             return true;
         }
         return false;
+    
     }
+
+    @Override
     public String toString() {
         return "Error " + errorCode + " " + errMsg;
     }
+    
     
 }

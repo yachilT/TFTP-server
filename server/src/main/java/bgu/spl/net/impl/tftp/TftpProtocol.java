@@ -47,10 +47,9 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     @Override
     public void start(int connectionId, Connections<BasePacket> connections) {
         this.currentClientId = connectionId;
-        System.out.println("given connectionId: " + this.currentClientId);
         this.connections = connections;
         this.users.put(currentClientId, "");
-        System.out.println("protocol started");
+
     }
 
     @Override
@@ -129,7 +128,6 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         try {
             dataSender = new FileSender(readPacket.getFileName(), fileManager);
             sendingData = true;
-            connections.send(currentClientId, new AcknowledgePacket((short)0));
             connections.send(currentClientId, dataSender.sendFirst());
 
         } catch (FileNotFoundException e) {
@@ -145,7 +143,6 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         try {
             dataSender = new DirectorySender(fileManager);
             sendingData = true;
-            connections.send(currentClientId, new AcknowledgePacket((short)0));
             returnPacket = dataSender.sendFirst();
         }
         catch (FileNotFoundException e) {
@@ -195,31 +192,30 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
         BasePacket bcast = new BroadCastPacket(added, fileName);
         Set<Integer> keySet = connections.getKeys();
 
-        keySet = keySet.stream().filter(x -> x != currentClientId && isLoggedIn()).collect(Collectors.toSet());
+        keySet = keySet.stream().filter(x -> isLoggedIn(x)).collect(Collectors.toSet());
         for (Integer key : keySet) {
             connections.send(key, bcast);
         }
     }
 
+    private boolean isLoggedIn(int id) {
+        return !users.get(id).equals("");
+    }
+
     public boolean isLoggedIn() {
-        return !users.get(currentClientId).equals("");
+        return isLoggedIn(currentClientId);
     }
 
     public void processLoginRQPacket(LoginRQPacket loginPacket){
         BasePacket returnPacket;
-        System.out.println(users.entrySet());
-        System.out.println("currentId: " + currentClientId);
-        System.out.println(this.users.get(currentClientId));
 
-        if(isLoggedIn())
+        if(isLoggedIn(currentClientId))
             returnPacket = new ErrorPacket((short)7, "User already logged in");
         else {
             String username = loginPacket.getUsername();
-            System.out.println("name in user? " + users.values().contains(username));
             if (!users.values().contains(username)) {
                 users.put(currentClientId, username);
                 returnPacket = new AcknowledgePacket((short)0);
-                System.out.println("BUILT ACK");
             }
             else {
                 returnPacket = new ErrorPacket((short)0, "username is not available");
@@ -230,9 +226,8 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
     public void processDisconnectRQPacket(DisconnectRQPacket disconnectPacket){
         
         BasePacket returnPacket = new AcknowledgePacket((short)0);
-        System.out.println("SENDING ACK AFTER DISC");
         connections.send(currentClientId, returnPacket);
-        users.put(currentClientId, null);
+        users.put(currentClientId, "");
         terminate();
     }
 

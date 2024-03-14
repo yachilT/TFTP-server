@@ -1,6 +1,5 @@
 package bgu.spl.net.impl.packets;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
@@ -28,9 +27,7 @@ public class DeleteRQPacket extends BasePacket {
     public byte[] encodePacket() {
         byte[] result;
         result = convertShortToBytes((short)opcode.ordinal()); // opcode
-        try {
-            result = mergeArrays(result, fileName.getBytes("UTF-8")); // file name
-        } catch (UnsupportedEncodingException e) {}
+        result = mergeArrays(result, fileName.getBytes(StandardCharsets.UTF_8)); // file name
         result = mergeArrays(result, ZERO); // 0 byte
         
         return result;

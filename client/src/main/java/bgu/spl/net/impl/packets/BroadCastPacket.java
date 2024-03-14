@@ -7,11 +7,13 @@ import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
 
 
 public class BroadCastPacket extends BasePacket {
-    private boolean added;
+    private Boolean added;
     private String fileName;
+    
+
     public BroadCastPacket(){
         super(OpCode.BCAST);
-        this.added = false;
+        this.added = null;
         this.fileName = null;
     }
 
@@ -39,18 +41,15 @@ public class BroadCastPacket extends BasePacket {
         return result;
     }
     @Override 
-    public boolean decodeNextByte(byte nextByte){
-        if(nextByte != 0){
-            bytes.add(nextByte);
-            length++;
-        }
-        if(length == 3){
-            short num = convert2BytesToShort(bytes.get(0), bytes.get(1));
-            added = num == 1 ? true : false;
+    public boolean decodeNextByte(byte nextByte) {
+        if (added == null) {
+            added = nextByte == 1;
             bytes.clear();
-            return false;
         }
-        if(nextByte == 0){
+        else if(nextByte != 0){
+            bytes.add(nextByte);
+        }
+        else if(nextByte == 0){
             fileName = new String(convertListToByteArr(bytes), StandardCharsets.UTF_8);
             bytes.clear();
             return true;
@@ -58,6 +57,8 @@ public class BroadCastPacket extends BasePacket {
         
         return false;
     }
+
+    @Override
     public String toString() {
         return "BCAST " + (added ? "add ":"del ") + fileName;
     }

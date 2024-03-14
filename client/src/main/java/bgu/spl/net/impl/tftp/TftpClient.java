@@ -2,68 +2,75 @@ package bgu.spl.net.impl.tftp;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.impl.packets.*;
-import bgu.spl.net.impl.tftp.transferdatapackets.FileManager;
 
 public class TftpClient {
     private Scanner scanner = new Scanner(System.in);
 
-    private int serverPort = 7777;
-    private String serverIp = "127.0.0.1";
-
-    private Socket sock;
-    private BufferedOutputStream out;
-    private LastRequest lastRequest;
-    private KeyboardLocker keyboardLocker;
+    public int serverPort = 7777;
+    public String serverIp = "127.0.0.1";
+    private CurrentRequest currentRequest;
 
     private MessageEncoderDecoder<BasePacket> encdec;
     private MessagingProtocol<BasePacket> protocol;
 
+    private Queue<String> inputQueue;
+
     public TftpClient() {
         scanner = new Scanner(System.in);
 
-        keyboardLocker = new KeyboardLocker();
-        protocol = new TftpMessagingProtocol(keyboardLocker, lastRequest);
-        lastRequest = new LastRequest();
+        currentRequest = new CurrentRequest();
+        protocol = new TftpMessagingProtocol(currentRequest);
 
         encdec = new TftpMessageEncoderDecoder();
+        inputQueue = new LinkedList<>();
     }  
-    public void run() {
-        try {
-            sock = new Socket(serverIp, serverPort);
-            out = new BufferedOutputStream(sock.getOutputStream());
-        } 
-        catch (UnknownHostException e) {e.printStackTrace();}
-        catch (IOException e) { e.printStackTrace();}
+    public void run() throws IOException {
+        try (Socket socket = new Socket(serverIp, serverPort); 
+            BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
+            BufferedInputStream in = new BufferedInputStream(socket.getInputStream());) {
         
-        try {
-            ServerListener serverListener = new ServerListener(new BufferedInputStream(sock.getInputStream()), out, encdec, protocol, keyboardLocker);
-            new Thread(serverListener).start();
-
+        
+        
+            ServerListener serverListener = new ServerListener(in, out, encdec, protocol, currentRequest);
+            Thread threadServerListener = new Thread(serverListener);
+            threadServerListener.start();
+            
             while(!protocol.shouldTerminate()) {
-                String input = scanner.nextLine();
-                BasePacket result = classifyInput(input);
-                if (result != null) {
-                    try {
-                        synchronized (out) {
-                            out.write(encdec.encode(result));
-                            out.flush();
-                        }
-                    } 
-                    catch (IOException e) { e.printStackTrace();}
+
+                while (System.in.available() == 0 & (inputQueue.isEmpty() | !currentRequest.isDone()) & !protocol.shouldTerminate());
+
+                if (System.in.available() > 0) {
+                    inputQueue.add(scanner.nextLine());
                 }
-                keyboardLocker.wait();
+
+                if (!inputQueue.isEmpty() & currentRequest.isDone()) {
+                    BasePacket result = classifyInput(inputQueue.remove());
+                    if (result != null) {
+                        try {
+                            synchronized (out) {
+                                byte[] b = encdec.encode(result);
+                                out.write(b);
+                                out.flush();
+                            }
+                        }
+                        catch (IOException e) { e.printStackTrace();}
+                    }
+                }
+                threadServerListener.interrupt();
             }
-        } catch (IOException | InterruptedException e) {} 
+        } 
         
     }
         
@@ -99,29 +106,29 @@ public class TftpClient {
 
     public BasePacket handleDISC(){
         DisconnectRQPacket packet = new DisconnectRQPacket();
-        lastRequest.setRequest(packet);
+        currentRequest.setRequest(packet);
        return packet;
         
     }
     public BasePacket handleDIRQ(){
         DirectoryRQPacket packet = new DirectoryRQPacket();
-        lastRequest.setRequest(packet);
+        currentRequest.setRequest(packet);
         return packet;
     }
     public BasePacket handleLOGRQ(String username){
         LoginRQPacket packet = new LoginRQPacket(username);
-        lastRequest.setRequest(packet);
+        currentRequest.setRequest(packet);
         return packet;
     }
     public BasePacket handleDELRQ(String filename){
-        DeleteRQPacket packet = new DeleteRQPacket();     
-        lastRequest.setRequest(packet);
+        DeleteRQPacket packet = new DeleteRQPacket(filename);     
+        currentRequest.setRequest(packet);
         return packet;
     }
     public BasePacket handleRRQ(String filename){
         ReadRQPacket packet = new ReadRQPacket(filename);
         try {
-            lastRequest.setRequest(packet);
+            currentRequest.setRequest(packet);
         } catch (FileAlreadyExistsException e) {
             System.out.println(filename + " already exists");
             return null;
@@ -134,14 +141,16 @@ public class TftpClient {
     public BasePacket handleWRQ(String filename){
         WriteRQPacket packet = new WriteRQPacket(filename);
         try {
-            lastRequest.setRequest(packet);
+            currentRequest.setRequest(packet);
         } catch (FileNotFoundException e) {
             System.out.println(filename + " doesn't exist");
         }
         return packet;
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         TftpClient client = new TftpClient();
+        client.serverIp = args[0];
+        client.serverPort = Integer.valueOf(args[1]);
         client.run();
     }
 }

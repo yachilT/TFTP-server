@@ -9,7 +9,6 @@ public class DisconnectRQPacket extends BasePacket {
     }
     @Override
     public void applyRequest(TftpProtocol protocol){
-        System.out.println("proccessing disconnet");
         protocol.processDisconnectRQPacket(this);
     }
     @Override

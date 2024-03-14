@@ -6,14 +6,11 @@ import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.impl.packets.*;
 
 public class TftpMessageEncoderDecoder implements MessageEncoderDecoder<BasePacket> {
-    //TODO: Implement here the TFTP encoder and decoder
     final LinkedList<Byte> currentBytes;
-    private short desiredLength;
     private BasePacket packet;
 
     public TftpMessageEncoderDecoder() {
         currentBytes = new LinkedList<>();
-        desiredLength = -1;
         packet = null;
     }
 
@@ -23,7 +20,6 @@ public class TftpMessageEncoderDecoder implements MessageEncoderDecoder<BasePack
             currentBytes.add(nextByte);
             if (currentBytes.size() == 2) {
                 short incomingOpCode = convert2BytesToShort(currentBytes.get(0), currentBytes.get(1));
-                System.out.println("incoming opcode: " + incomingOpCode);
                 if (incomingOpCode == OpCode.RRQ.ordinal()) {
                     packet = new ReadRQPacket();
                     return null;

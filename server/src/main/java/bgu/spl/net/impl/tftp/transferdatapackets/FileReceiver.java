@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import bgu.spl.net.impl.tftp.packets.AcknowledgePacket;
 import bgu.spl.net.impl.tftp.packets.DataPacket;
@@ -19,7 +18,7 @@ public class FileReceiver {
     public FileReceiver(String name, FileManager fileManager) throws IOException {
         this.fileManager = fileManager;
         this.fileName = name;
-        workingFile = new File(fileManager.getPath() + "/" + name);
+        workingFile = new File(this.fileManager.getPath() + "/" + name);
         if (!workingFile.createNewFile())
             throw new FileAlreadyExistsException(name);
             

@@ -48,4 +48,8 @@ public class WriteRQPacket extends BasePacket {
         return true;
     }
     
+    @Override
+    public String toString() {
+        return "WRQ " + this.fileName;
+    }
 }

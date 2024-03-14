@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -82,7 +81,7 @@ public class TftpServer implements Server<BasePacket>{
             System.out.println("files directory not found");
             return;
         }
-        Server<BasePacket> server = new TftpServer(7777, () -> new TftpProtocol(users, fileManager), () -> new TftpEncoderDecoder());
+        Server<BasePacket> server = new TftpServer(Integer.valueOf(args[0]), () -> new TftpProtocol(users, fileManager), () -> new TftpEncoderDecoder());
         server.serve();
         try {
             server.close();

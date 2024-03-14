@@ -51,4 +51,9 @@ public class ReadRQPacket extends BasePacket {
         System.out.println("\n" + fileName);
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "RRQ " + this.fileName;
+    }
 }
