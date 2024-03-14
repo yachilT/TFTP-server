@@ -10,7 +10,7 @@ public class FileReceiver extends DataReceiver{
     private File workingFile;
     private FileOutputStream writer;
 
-    public FileReceiver(String name) throws IOException {
+    public FileReceiver(String name) throws IOException, FileAlreadyExistsException {
         this.fileName = name;
         workingFile = new File(name);
         if (!workingFile.createNewFile())

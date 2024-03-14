@@ -9,8 +9,8 @@ import bgu.spl.net.impl.packets.DataPacket;
 public class FileSender extends DataSender {
     private FileInputStream reader;
 
-    public FileSender(String name, FileManager fileManager) throws FileNotFoundException {
-        this.reader = new FileInputStream(fileManager.getFile(name));
+    public FileSender(String name) throws FileNotFoundException {
+        this.reader = new FileInputStream(name);
         System.out.println("Found " + name);
         lastDataPacket = null;
     }

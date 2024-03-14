@@ -2,9 +2,11 @@ package bgu.spl.net.impl.tftp;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.Scanner;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
@@ -22,7 +24,6 @@ public class TftpClient {
     private BufferedOutputStream out;
     private LastRequest lastRequest;
     private KeyboardLocker keyboardLocker;
-    private FileManager fileManager;
 
     private MessageEncoderDecoder<BasePacket> encdec;
     private MessagingProtocol<BasePacket> protocol;
@@ -31,7 +32,7 @@ public class TftpClient {
         scanner = new Scanner(System.in);
 
         keyboardLocker = new KeyboardLocker();
-        protocol = new TftpMessagingProtocol(fileManager, keyboardLocker, lastRequest);
+        protocol = new TftpMessagingProtocol(keyboardLocker, lastRequest);
         lastRequest = new LastRequest();
 
         encdec = new TftpMessageEncoderDecoder();
@@ -119,15 +120,26 @@ public class TftpClient {
     }
     public BasePacket handleRRQ(String filename){
         ReadRQPacket packet = new ReadRQPacket(filename);
-        lastRequest.setRequest(packet);
+        try {
+            lastRequest.setRequest(packet);
+        } catch (FileAlreadyExistsException e) {
+            System.out.println(filename + " already exists");
+            return null;
+        } catch (IOException e) {
+            System.out.println("Couldn't download");
+            return null;
+        } 
         return packet;
     }
     public BasePacket handleWRQ(String filename){
         WriteRQPacket packet = new WriteRQPacket(filename);
-        lastRequest.setRequest(packet);
+        try {
+            lastRequest.setRequest(packet);
+        } catch (FileNotFoundException e) {
+            System.out.println(filename + " doesn't exist");
+        }
         return packet;
     }
-    //TODO: implement the main logic of the client, when using a thread per client the main logic goes here
     public static void main(String[] args) {
         TftpClient client = new TftpClient();
         client.run();

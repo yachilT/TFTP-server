@@ -1,6 +1,8 @@
 package bgu.spl.net.impl.tftp;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 
 import bgu.spl.net.impl.packets.*;
 import bgu.spl.net.impl.tftp.transferdatapackets.*;
@@ -20,11 +22,11 @@ public class LastRequest {
         this.requestOpCode = packet.getOpCode();
     }
     
-    public synchronized void setRequest(ReadRQPacket packet) {
+    public synchronized void setRequest(ReadRQPacket packet) throws IOException, FileAlreadyExistsException {
         this.requestOpCode = packet.getOpCode();
         dataReciever = new FileReceiver(packet.getFileName());
     }
-    public synchronized void setRequest(WriteRQPacket packet){
+    public synchronized void setRequest(WriteRQPacket packet) throws FileNotFoundException{
         this.requestOpCode = packet.getOpCode();
         dataSender = new FileSender(packet.getFileName());
     }
