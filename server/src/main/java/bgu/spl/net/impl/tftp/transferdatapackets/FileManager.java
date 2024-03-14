@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class FileManager {
-    private final String workingDirectory = "Flies";
+    private final String workingDirectory = "Files";
     public List<String> availableFiles;
 
     public FileManager() throws FileNotFoundException {
