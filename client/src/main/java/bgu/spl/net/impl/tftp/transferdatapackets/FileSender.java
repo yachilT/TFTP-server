@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.NoSuchElementException;
-
 import bgu.spl.net.impl.packets.DataPacket;
 
 public class FileSender extends DataSender {

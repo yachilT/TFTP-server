@@ -30,7 +30,7 @@ public abstract class DataSender {
         catch(NoSuchElementException e){
             if(lastDataPacket.getSize() < DataPacket.MAX_DATA_SIZE)
                 throw e;
-            else{    
+            else {    
                 lastDataPacket = new DataPacket((short)(lastDataPacket.getBlockNumber() + 1), new byte[0]);
             }
 
