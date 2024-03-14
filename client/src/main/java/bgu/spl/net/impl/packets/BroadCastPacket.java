@@ -3,6 +3,8 @@ package bgu.spl.net.impl.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
+import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
+
 
 public class BroadCastPacket extends BasePacket {
     private boolean added;
@@ -19,10 +21,11 @@ public class BroadCastPacket extends BasePacket {
         this.fileName = fileName;
 
     }
-    // @Override
-    // public void applyRequest(TftpProtocol protocol){
-       
-    // }
+    @Override
+    public BasePacket applyRequest(TftpMessagingProtocol protocol){
+       System.out.println("BCAST " + (added ? "add ":"del ") + fileName);
+       return null;
+    }
     
     @Override
     public byte[] encodePacket() {

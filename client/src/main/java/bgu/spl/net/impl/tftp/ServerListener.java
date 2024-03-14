@@ -3,56 +3,53 @@ package bgu.spl.net.impl.tftp;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
-import bgu.spl.net.impl.packets.*;
 import bgu.spl.net.impl.packets.BasePacket;
 
 public class ServerListener implements Runnable{
 
     private final MessagingProtocol<BasePacket> protocol;
     private final MessageEncoderDecoder<BasePacket> encdec;
-    private final Socket sock;
-    private BufferedInputStream in;
-    private BufferedOutputStream out;
+    private final BufferedInputStream in;
+    private final BufferedOutputStream out;
     private volatile boolean connected = true;
+    private KeyboardLocker locker;
 
-    private BlockingQueue<BasePacket> packetsToSend;
+    private volatile boolean ackAfterWRQ;
+    private volatile boolean ackAfterRRQ;
 
-    public ServerListener(Socket sock, MessageEncoderDecoder<BasePacket> reader, MessagingProtocol<BasePacket> protocol, BlockingQueue<BasePacket> packetsToSend) {
-        this.sock = sock;
+    public ServerListener(BufferedInputStream in, BufferedOutputStream out, MessageEncoderDecoder<BasePacket> reader, MessagingProtocol<BasePacket> protocol, KeyboardLocker locker) {
+        this.in = in;
+        this.out = out;
         this.encdec = reader;
         this.protocol = protocol;
-        this.packetsToSend = packetsToSend;
+        this.locker = locker;
     }
+
+
 
     @Override
     public void run() {
-        try (Socket sock = this.sock) { //just for automatic closing
-            int read;
-
-            in = new BufferedInputStream(sock.getInputStream());
-            out = new BufferedOutputStream(sock.getOutputStream());
-
+        int read;
+        try {
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                 BasePacket nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
                     BasePacket response = protocol.process(nextMessage);
                     if (response != null) {
-                        synchronized(out){
-                        out.write(encdec.encode(response));
-                        out.flush();
+                        synchronized (out) {
+                            out.write(encdec.encode(response));
+                            out.flush();
                         }
+                        // if(locker.shouldNotify())
+                        //     locker.notifyAll();
                     }
                 }
             }
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        } catch (IOException e) {}
 
     }
 

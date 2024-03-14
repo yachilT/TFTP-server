@@ -13,9 +13,9 @@ public class FileManager {
     public FileManager() throws FileNotFoundException {
         availableFiles = new LinkedList<>();
         File f = new File(workingDirectory);
-        if(!f.exists())
+        if (!f.exists()) {
             throw new FileNotFoundException();
-        
+        }
         availableFiles = new LinkedList<>(Arrays.asList(f.list()));
     }
 

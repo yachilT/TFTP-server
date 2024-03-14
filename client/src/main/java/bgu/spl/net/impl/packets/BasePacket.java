@@ -3,6 +3,8 @@ package bgu.spl.net.impl.packets;
 import java.util.LinkedList;
 import java.util.List;
 
+import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
+
 
 public abstract class BasePacket {
     protected final static byte[] ZERO = new byte[]{(byte) 0};
@@ -23,7 +25,7 @@ public abstract class BasePacket {
 
 
 
-    // public abstract void applyRequest(TftpProtocol protocol);
+    public abstract BasePacket applyRequest(TftpMessagingProtocol protocol);
     public abstract byte[] encodePacket();
     public abstract boolean decodeNextByte(byte nextByte);
 

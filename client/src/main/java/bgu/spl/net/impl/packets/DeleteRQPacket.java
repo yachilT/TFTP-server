@@ -3,6 +3,8 @@ package bgu.spl.net.impl.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
+import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
+
 
 public class DeleteRQPacket extends BasePacket {
     private String fileName;
@@ -18,13 +20,10 @@ public class DeleteRQPacket extends BasePacket {
     public String getFileName() {
         return fileName;
     }
-    // @Override
-    // public void applyRequest(TftpProtocol protocol){
-    //     if(protocol.isLoggedIn())
-    //         protocol.processDelPacket(this);
-    //     else
-    //         protocol.sendsErrorNotLoggedIn();
-    // }
+    @Override
+    public BasePacket applyRequest(TftpMessagingProtocol protocol){
+        return null;
+    }
     @Override
     public byte[] encodePacket() {
         byte[] result;

@@ -82,8 +82,12 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
 
                     if (((DataPacket)message).getSize() < DataPacket.MAX_DATA_SIZE) {
                         receivingData = false;
-                        
-                        try { dataReceiver.close(); } catch (IOException e1) {}
+                        try {
+                            dataReceiver.close();
+                            fileManager.addFile(dataReceiver.getfileName());
+                        } catch (IOException e) {}
+        
+                        broadcast(true, dataReceiver.getfileName());
                     }
 
                 } catch (IOException e) {
@@ -94,14 +98,14 @@ public class TftpProtocol implements BidiMessagingProtocol<BasePacket>  {
                     } catch (IOException e1) {}
                 }
             }
-            else {
+            else if (message.getOpCode() == OpCode.ERROR) {
                 receivingData = false;
                 try {
-                    dataReceiver.close();
-                    fileManager.addFile(dataReceiver.getfileName());
+                    dataReceiver.error();
                 } catch (IOException e) {}
-
-                broadcast(true, dataReceiver.getfileName());
+            }
+            else {
+                connections.send(currentClientId, new ErrorPacket((short)0, "was expecting DATA packet"));
             }
         }
         message.applyRequest(this);

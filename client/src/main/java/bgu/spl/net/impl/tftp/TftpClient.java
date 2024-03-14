@@ -1,56 +1,74 @@
 package bgu.spl.net.impl.tftp;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.impl.packets.*;
+import bgu.spl.net.impl.tftp.transferdatapackets.FileManager;
 
 public class TftpClient {
-    //TODO: implement the main logic of the client, when using a thread per client the main logic goes here
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        boolean terminate = false;
-        int serverPort = 7777;
-        String serverIp = "127.0.0.1";
-        Socket sock = null;
-        BufferedOutputStream out = null;
-        BlockingQueue<BasePacket> packetsToSend = new LinkedBlockingDeque<>();
-        MessageEncoderDecoder<BasePacket> encdec = new TftpMessageEncoderDecoder();
-        MessagingProtocol<BasePacket> protocol = new TftpMessagingProtocol();
-        
+    private Scanner scanner = new Scanner(System.in);
 
+    private int serverPort = 7777;
+    private String serverIp = "127.0.0.1";
+
+    private Socket sock;
+    private BufferedOutputStream out;
+    private LastRequest lastRequest;
+    private KeyboardLocker keyboardLocker;
+    private FileManager fileManager;
+
+    private MessageEncoderDecoder<BasePacket> encdec;
+    private MessagingProtocol<BasePacket> protocol;
+
+    public TftpClient() {
+        scanner = new Scanner(System.in);
+
+        keyboardLocker = new KeyboardLocker();
+        protocol = new TftpMessagingProtocol(fileManager, keyboardLocker, lastRequest);
+        lastRequest = new LastRequest();
+
+        encdec = new TftpMessageEncoderDecoder();
+    }  
+    public void run() {
         try {
             sock = new Socket(serverIp, serverPort);
             out = new BufferedOutputStream(sock.getOutputStream());
         } 
         catch (UnknownHostException e) {e.printStackTrace();}
         catch (IOException e) { e.printStackTrace();}
-        Thread listenerServerThread = new Thread(new ServerListener(sock , encdec, protocol, packetsToSend));
-        listenerServerThread.start();
         
-        while(!terminate){
-            String input = scanner.nextLine();
-            BasePacket result = classifyInput(input);
-            if (result != null) {
-                try {
-                    out.write(encdec.encode(result));
-                    out.flush();
-                } 
-                catch (IOException e) { e.printStackTrace();}
+        try {
+            ServerListener serverListener = new ServerListener(new BufferedInputStream(sock.getInputStream()), out, encdec, protocol, keyboardLocker);
+            new Thread(serverListener).start();
+
+            while(!protocol.shouldTerminate()) {
+                String input = scanner.nextLine();
+                BasePacket result = classifyInput(input);
+                if (result != null) {
+                    try {
+                        synchronized (out) {
+                            out.write(encdec.encode(result));
+                            out.flush();
+                        }
+                    } 
+                    catch (IOException e) { e.printStackTrace();}
                 }
+                keyboardLocker.wait();
             }
-        }
+        } catch (IOException | InterruptedException e) {} 
+        
+    }
         
     
 
-    public static BasePacket classifyInput(String input){
+    public BasePacket classifyInput(String input){
         String[] parts = input.split(" ", 2);
         if(parts.length == 0){
             System.out.println("Invalid command");
@@ -77,23 +95,35 @@ public class TftpClient {
         }
 
     }
-    public static BasePacket handleDISC(){
+
+    public BasePacket handleDISC(){
+        lastRequest.setOpcode(OpCode.DISC);
        return new DisconnectRQPacket();
         
     }
-    public static BasePacket handleDIRQ(){
+    public BasePacket handleDIRQ(){
+        lastRequest.setOpcode(OpCode.DIRQ);
         return new DirectoryRQPacket();
     }
-    public static BasePacket handleLOGRQ(String username){
+    public BasePacket handleLOGRQ(String username){
+        lastRequest.setOpcode(OpCode.LOGRQ);
         return new LoginRQPacket(username);
     }
-    public static BasePacket handleDELRQ(String filename){
+    public BasePacket handleDELRQ(String filename){
+        lastRequest.setOpcode(OpCode.DELRQ);
         return new DeleteRQPacket(filename);
     }
-    public static BasePacket handleRRQ(String filename){
+    public BasePacket handleRRQ(String filename){
+        lastRequest.setOpcode(OpCode.RRQ);
         return new ReadRQPacket(filename);
     }
-    public static BasePacket handleWRQ(String filename){
+    public BasePacket handleWRQ(String filename){
+        lastRequest.setOpcode(OpCode.WRQ);
         return new WriteRQPacket(filename);
+    }
+    //TODO: implement the main logic of the client, when using a thread per client the main logic goes here
+    public static void main(String[] args) {
+        TftpClient client = new TftpClient();
+        client.run();
     }
 }

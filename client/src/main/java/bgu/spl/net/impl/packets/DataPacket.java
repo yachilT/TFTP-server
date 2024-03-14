@@ -1,5 +1,6 @@
 package bgu.spl.net.impl.packets;
 
+import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
 
 public class DataPacket extends BasePacket {
     public static final short MAX_DATA_SIZE = 512;
@@ -21,9 +22,10 @@ public class DataPacket extends BasePacket {
         this.data = new byte[0];
     }
 
-    // @Override
-    // public void applyRequest(TftpProtocol protocol){
-    // }
+    @Override
+    public BasePacket applyRequest(TftpMessagingProtocol protocol) {
+        return protocol.handleReceivingData(this);
+    }
 
     public short getBlockNumber() {
         return blockNumber;

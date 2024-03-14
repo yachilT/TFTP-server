@@ -3,6 +3,8 @@ package bgu.spl.net.impl.packets;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
+import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
+
 
 public class ReadRQPacket extends BasePacket {
     private String fileName;
@@ -15,13 +17,10 @@ public class ReadRQPacket extends BasePacket {
         super(OpCode.RRQ);
         this.fileName = fileName;
     }
-    // @Override
-    // public void applyRequest(TftpProtocol tftp){
-    //     if(tftp.isLoggedIn())
-    //         tftp.processReadRQPacket(this);
-    //     else   
-    //         tftp.sendsErrorNotLoggedIn();
-    // }
+    @Override
+    public BasePacket applyRequest(TftpMessagingProtocol tftp){
+        return null;
+    }
 
     public String getFileName() {
         return fileName;

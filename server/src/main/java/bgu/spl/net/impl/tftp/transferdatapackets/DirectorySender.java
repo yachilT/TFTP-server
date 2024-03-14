@@ -12,17 +12,18 @@ import bgu.spl.net.impl.tftp.packets.DataPacket;
 
 public class DirectorySender extends DataSender {
 
-    List<Byte> bytes;
-    
+    private List<Byte> bytes;
+    private FileManager fileManager;
 
     public DirectorySender(FileManager manager) throws FileNotFoundException {
+        fileManager = manager;
         File dirPath = new File (manager.getPath());
         
         if (!dirPath.exists()) {
             throw new FileNotFoundException();
         }
         bytes = new LinkedList<>();
-        for (String dir : dirPath.list()) {
+        for (String dir : fileManager.getAvailableFiles()) {
             byte[] data = dir.getBytes(StandardCharsets.UTF_8);
             for (byte b : data) {
                 bytes.add(b);

@@ -1,17 +1,15 @@
 package bgu.spl.net.impl.packets;
 
+import bgu.spl.net.impl.tftp.TftpMessagingProtocol;
 
 public class DirectoryRQPacket extends BasePacket{
     public DirectoryRQPacket(){
         super(OpCode.DIRQ);
     }
-    // @Override
-    // public void applyRequest(TftpProtocol protocol){ 
-    //     if(protocol.isLoggedIn())
-    //         protocol.processDirPacket(this);
-    //     else
-    //         protocol.sendsErrorNotLoggedIn();
-    // }
+    @Override
+    public BasePacket applyRequest(TftpMessagingProtocol protocol){ 
+        return null;
+    }
     @Override
     public byte[] encodePacket() {
         return convertShortToBytes((short)opcode.ordinal()); // opcode
